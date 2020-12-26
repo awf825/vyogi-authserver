@@ -10,12 +10,15 @@ const mongoose = require('mongoose');
 const url = process.env.MONGODB_URL || 'mongodb://localhost:auth/auth'
 
 const app = express();
-logger.info('vars after express init', { mongo: process.env.MONGODB_URL, environment: process.env, dbUrl: url })
-console.log(process.env.MONGODB_URL)
-console.log(process.env)
-console.log(url)
+//mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+try {
+	mongoose.connect( url, {useNewUrlParser: true, useUnifiedTopology: true}, () =>
+		console.log("connected")
+	);    
+} catch (error) { 
+	console.log("could not connect, error:", error);    
+}
 
 app.use(morgan('combined'));
 app.use(bodyParser.json({ type: '*/*' }))
