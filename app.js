@@ -5,8 +5,8 @@ const logger = require('heroku-logger')
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const router = require('./router.js');
-
 const mongoose = require('mongoose');
+const cors = require('cors');
 const url = process.env.MONGODB_URL || 'mongodb://localhost:auth/auth'
 
 const app = express();
@@ -21,11 +21,12 @@ try {
 }
 
 app.use(morgan('combined'));
-app.use(bodyParser.json({ type: '*/*' }))
+app.use(cors());
+app.use(bodyParser.json({ type: '*/*' }));
 
-router(app)
+router(app);
 
 const port = process.env.PORT || 3090;
-const server = http.createServer(app)
+const server = http.createServer(app);
 server.listen(port);
-console.log('server listening on:', port)
+console.log('server listening on:', port);
