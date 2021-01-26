@@ -8,7 +8,6 @@ const router = require('./router.js');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const url = process.env.MONGODB_URL || 'mongodb://localhost:auth/auth'
-console.log(url)
 const app = express();
 //mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 
