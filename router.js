@@ -11,4 +11,6 @@ module.exports = function(app) {
   })
   app.post('/signup', Authentication.signup)
   app.post('/signin', requireSignin, Authentication.signin)
+  app.post('/signout', Authentication.signout)
+  //app.get('/blah', requireAuth, Foo.bar)
 }
