@@ -9,7 +9,6 @@ function tokenForUser(user) {
 }
 
 exports.signin = function(req, res, next) {
-  // error code
   res.send({ token: tokenForUser(req.user) })
 }
 
@@ -19,7 +18,7 @@ exports.signup = function(req, res, next) {
   const passwordConf = req.body.passwordConf
 
   if (password !== passwordConf) {
-    return res.sendStatus(400)
+    return res.sendStatus(406)
   }
   // See if a user with the given email exists
   User.findOne({ email: email }, function(err, existingUser) {
