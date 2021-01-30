@@ -5,11 +5,11 @@ const bcrypt = require('bcrypt-nodejs');
 const userSchema = new Schema({
   email: { type: String, unique: true, lowercase: true },
   password: String,
-  isAdmin: Boolean,
-  bookings: [{
-    type: Schema.Types.ObjectId,
-    ref: "Booking"
-  }]
+  bookingIds: []
+  // bookings: [{
+  //   type: Schema.Types.ObjectId,
+  //   ref: "Booking"
+  // }]
 })
 
 // same as before_save callback in rails (presave)

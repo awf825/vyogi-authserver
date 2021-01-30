@@ -7,11 +7,12 @@ const lessonSchema = new Schema({
 	skillLevel: String,
 	booked: Boolean,
 	startTime: Date,
-	cost: Schema.Types.Decimal128,
-	bookings: [{
-	    type: Schema.Types.ObjectId,
-	    ref: "Booking"
-    }]
+	cost: Number,
+	bookingIds: []
+	// bookings: [{
+	//     type: Schema.Types.ObjectId,
+	//     ref: "Booking"
+ //    }]
 })
 
 module.exports = mongoose.model('lesson', lessonSchema)
