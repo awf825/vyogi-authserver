@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 let bookingSchema = new Schema({
 	payment_made: Boolean,
 	cancelled: Boolean,
-	userId: Number,
-	lessonId: Number
+	userId: String,
+	lessonId: String
 	// user_id: {
 	// 	type: Schema.Types.ObjectId,
 	// 	ref: "User"

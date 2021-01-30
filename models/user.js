@@ -5,7 +5,21 @@ const bcrypt = require('bcrypt-nodejs');
 const userSchema = new Schema({
   email: { type: String, unique: true, lowercase: true },
   password: String,
-  bookingIds: []
+  bookings: Array
+  // bookings: [
+  //   {
+  //     payment_made: true,
+  //     cancelled: true,
+  //     lessonId: 1
+  //   },
+  //   {
+  //     payment_made: true,
+  //     cancelled: true,
+  //     lessonId: 2
+  //   }
+  //   ...
+  // ]
+
   // bookings: [{
   //   type: Schema.Types.ObjectId,
   //   ref: "Booking"
