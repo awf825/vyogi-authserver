@@ -1,6 +1,7 @@
 const Authentication = require('./controllers/authentication.js');
 const LessonControl = require('./controllers/lesson.js');
 const ChargeControl = require('./controllers/charge.js');
+const VideoControl = require('./controllers/video.js');
 const passportService = require('./services/passport.js');
 const passport = require('passport');
 
@@ -14,5 +15,8 @@ module.exports = function(app) {
   app.get('/lessons', requireAuth, LessonControl.getAll)
   app.get('/stripe', requireAuth, ChargeControl.serveToken)
   app.post('/charges', requireAuth, ChargeControl.charge)
+  app.get('/codes', LessonControl.getCodesFromCurrentLesson)
+  app.get('/video', VideoControl.buildVideo)
+  app.get('/video_client', requireAuth, VideoControl.requestVideo)
   //app.get('/blah', requireAuth, Foo.bar)
 }

@@ -6,7 +6,7 @@ const lessonSchema = new Schema({
 	description: String,
 	skillLevel: String,
 	booked: Boolean,
-	startTime: Date,
+	startTime: Number,
 	cost: Number,
 	bookings: Array
 	  // bookings: [

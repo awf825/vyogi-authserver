@@ -31,4 +31,10 @@
    Something like this will update a nested array that doesn't have an entries
    ```
    User.update({"email": "client1@clientmail.com"}, {$addToSet: {bookings: {bookingId: "bkg", lessonId: "lsn"}}});
-   ``` 
+   ```
+   Good thing to have around when dealing with time in the backend 
+   ```
+   new Date(1612066842332).toLocaleString('en-US', { timeZone: 'America/New_York' })
+   ```
+
+   https://docs.mongodb.com/manual/reference/operator/update/pull/

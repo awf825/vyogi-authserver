@@ -35,14 +35,16 @@ exports.charge = async function(req, res, next) {
 
 	await newBooking.save(function (err, booking) {
 		if (err) return handleError(err);
+		let code = Math.random().toString(36).substring().split('.')[1];
 		User.findOneAndUpdate(
 			userQuery, 
 			{ 
 				"$push": { 
 					"bookings": { 
 						"_id": booking._id, 
-						"lessonId": mongoose.Types.ObjectId(lesson) 
-					} 
+						"lessonId": mongoose.Types.ObjectId(lesson),
+						"code": code
+					}
 				} 
 			}, function(err, doc) {
 				if (err) return res.send(500, {error: err});
@@ -54,12 +56,14 @@ exports.charge = async function(req, res, next) {
 				"$push": { 
 					"bookings": { 
 						"_id": booking._id, 
-						"userId": mongoose.Types.ObjectId(user) 
-					} 
+						"userId": mongoose.Types.ObjectId(user),
+						"code": code
+					}
 				} 
 			}, function(err, doc) {
 				if (err) return res.send(500, {error: err});
-			} );
+			} 
+		);
 		res.sendStatus(204);
 	});
 }

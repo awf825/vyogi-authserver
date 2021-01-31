@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.834.0",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -21,6 +22,7 @@
     "mongoose": "^5.11.8",
     "morgan": "^1.10.0",
     "node": "^15.4.0",
+    "node-fetch": "^2.6.1",
     "nodemon": "^2.0.6",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
