@@ -3,9 +3,16 @@ const User = require('../models/user.js');
 const config = require('../config');
 
 function tokenForUser(user) {
-  const timestamp = new Date().getTime();
-  // attach token logic here to whitelisted emails stored in config (me, Alanna, others)
-  return jwt.encode({ sub: user.id, iat: timestamp }, config.secret);
+  const now = + new Date();
+  // aud should change when process.env changes
+  return jwt.encode(
+    { 
+      sub: user.id, 
+      iat: now,
+      exp: now+3600000
+    }, 
+    config.secret
+  );
 }
 
 exports.signin = function(req, res, next) {
@@ -33,7 +40,8 @@ exports.signup = function(req, res, next) {
     // If a user with email does NOT exist, create and save user record
     const user = new User({
       email: email,
-      password: password
+      password: password,
+      isAdmin: config.adminWhitelist.includes(email)
     });
 
     user.save(function(err) {

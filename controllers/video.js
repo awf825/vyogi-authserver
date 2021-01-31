@@ -1,6 +1,6 @@
 const config = require('../config.js');
+const User = require('../models/user.js');
 const AWS = require('aws-sdk');
-const key = config.dailyVideoApiKey;
 const fetch = require('node-fetch');
 
 // AWS.config.update({
@@ -9,26 +9,31 @@ const fetch = require('node-fetch');
 // })
 
 exports.buildVideo = async function(req, res, next) {
-  const now = + new Date()
+  const authorized = await User.findOne({ "_id": req.body.user}).exec();
+  if (authorized && authorized.isAdmin) {
+    let now = + new Date();
+    let url = 'https://api.daily.co/v1/rooms';
+    let options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json', 
+        Authorization: `Bearer ${config.dailyVideoApiKey}`
+      },
+      body: JSON.stringify({
+          properties: { 
+            exp: now+3600000
+        }
+      })
+    };
+    const rooms = await fetch(url, options)
+     .then(res => res.json())
+     .catch(err => response.status(500).json({ error: err.message }))
 
-  let url = 'https://api.daily.co/v1/rooms';
-  let options = {
-  	method: 'POST',
-  	headers: {
-  	  'Content-Type': 'application/json', 
-  	  Authorization: `Bearer ${key}`
-  	},
-  	body: JSON.stringify({
-  		properties: { 
-  			max_participants: 1,
-  			exp: now+3600000
-  		}
-  	})
-  };
-
-  const rooms = await fetch(url, options)
-   .then(res => res.json())
-   .catch(err => response.status(500).json({ error: err.message }))
+    res.json(rooms);
+  } else {
+    res.sendStatus(406);
+  }
+}
 
    // {
    // 	"id":"94eb015f-8814-4ee2-85f4-cce949add0df",
@@ -64,9 +69,6 @@ exports.buildVideo = async function(req, res, next) {
 
   // PUT THE LINK IN BUCKET HERE, IF GOOD, SEND EXISTING RES, 
   // ELSE THROW ERR
-
-  res.json(rooms);
-}
 
 exports.requestVideo = function(req, res, next) {
 	
