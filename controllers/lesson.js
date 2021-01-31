@@ -6,10 +6,9 @@ exports.getAll = async function(req, res, next) {
 	res.json({ lessons: payload })
 }
 
-exports.getCodesFromCurrentLesson = async function(req, res, next) {
+exports.getCurrentLesson = async function(req, res, next) {
 	var now = + new Date()
-	let currentLesson = await Lesson.find( { startTime: { $lt: now } } ).sort( { $natural: -1 } ).limit(1);
-	
+	let currentLesson = await Lesson.find( { startTime: { $lt: now } }, {"_id": 1} ).sort( { $natural: -1 } ).limit(1);
 	res.json({ l: currentLesson })
 // 	res.json({ codes: payload })
 }

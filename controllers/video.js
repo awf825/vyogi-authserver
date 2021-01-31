@@ -1,18 +1,20 @@
 const config = require('../config.js');
 const User = require('../models/user.js');
+const Lesson = require('../models/lesson.js');
 const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
 
-// AWS.config.update({
-// 	awsAccessKeyId: config.accessKeyId,
-// 	awsSecretAccessKey: config.secretAccessKey
-// })
+const s3 = new AWS.S3({
+  accessKeyId: config.accessKeyId,
+  secretAccessKey: config.secretAccessKey
+}) 
 
 exports.buildVideo = async function(req, res, next) {
   const authorized = await User.findOne({ "_id": req.body.user}).exec();
   if (authorized && authorized.isAdmin) {
     let now = + new Date();
     let url = 'https://api.daily.co/v1/rooms';
+    
     let options = {
       method: 'POST',
       headers: {
@@ -25,11 +27,28 @@ exports.buildVideo = async function(req, res, next) {
         }
       })
     };
-    const rooms = await fetch(url, options)
+
+    const room = await fetch(url, options)
      .then(res => res.json())
      .catch(err => response.status(500).json({ error: err.message }))
 
-    res.json(rooms);
+    let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
+    var y = new Date().getFullYear();
+    // JS returns 0 for Jan
+    var m = ( new Date().getMonth() + 1 );
+    var d = new Date().getDate();
+
+    const bucketParams = {
+      Bucket: config.resourceBucket,
+      Key: `${y}/${m}/${d}/${currentLessonId}`,
+      Body: room.url
+    };
+
+    s3.putObject(bucketParams, function(err, data) {
+      if (err) { return res.send({"message":err}) }
+    });
+
+    res.json(room);
   } else {
     res.sendStatus(406);
   }
@@ -66,9 +85,6 @@ exports.buildVideo = async function(req, res, next) {
    // 		"geo":null
    // 	}
    // }
-
-  // PUT THE LINK IN BUCKET HERE, IF GOOD, SEND EXISTING RES, 
-  // ELSE THROW ERR
 
 exports.requestVideo = function(req, res, next) {
 	
