@@ -18,7 +18,8 @@ function tokenForUser(user) {
 exports.signin = function(req, res, next) {
   res.send({ 
     token: tokenForUser(req.user), 
-    _id: req.user._id
+    _id: req.user._id,
+    isAdmin: req.user.isAdmin
   })
 }
 
