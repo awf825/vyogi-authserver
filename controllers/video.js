@@ -68,7 +68,7 @@ exports.requestVideo = async function(req, res, next) {
     if (codes.includes(req.body.code)) {
       const bucketParams = {
         Bucket: config.resourceBucket,
-        Key: `${y}/${m}/${d-1}/${currentLessonId}`
+        Key: `${y}/${m}/${d}/${currentLessonId}`
       }
       const bucketResponse = await s3.getObject(bucketParams, function(err, data) {
         if (err) { return res.send({"message":err}) }
