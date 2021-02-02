@@ -61,25 +61,22 @@ exports.buildVideo = async function(req, res, next) {
 }
 
 exports.requestVideo = async function(req, res, next) {
+  let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
   let currentLesson = await Lesson.find( { startTime: { $lt: now } } ).sort( { $natural: -1 } ).limit(1);
   if (typeof(currentLesson) !== undefined) {
     const codes = currentLesson[0].bookings.map(bkg=>bkg.code)
-    
-  }
-    // if (codes.includes(req.body)) {
-    //   const bucketParams = {
-    //     Bucket: config.resourceBucket,
-    //     Key: `${y}/${m}/${d}/${currentLessonId}`
-    //   }
-
-
-    //   const bucketResponse = await s3.getObject(bucketParams, function(err, data) {
-    //     if (err) { return res.send({"message":"Lesson is not live yet"}) }
-    //     res.json(data.Body)
-    //   });
-    // } else {
-    //   return res.json({"message":"code is invalid"})
-    // }
+    if (codes.includes(req.body.code)) {
+      const bucketParams = {
+        Bucket: config.resourceBucket,
+        Key: `${y}/${m}/${d-1}/${currentLessonId}`
+      }
+      const bucketResponse = await s3.getObject(bucketParams, function(err, data) {
+        if (err) { return res.send({"message":err}) }
+        res.json(data.Body.toString('utf-8'))
+      });
+    } else {
+      return res.json({"message":"code is invalid"})
+    }
   } else {
     return res.json({"message":"lesson is undefined"})
   }
