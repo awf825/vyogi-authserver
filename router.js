@@ -16,7 +16,7 @@ module.exports = function(app) {
   app.get('/stripe', requireAuth, ChargeControl.serveToken)
   app.post('/charges', requireAuth, ChargeControl.charge)
   //app.get('/codes', requireAuth, LessonControl.getCurrentLesson)
-  app.post('/video', VideoControl.buildVideo)
+  app.post('/video', requireAuth, VideoControl.buildVideo)
   app.post('/video_client', VideoControl.requestVideo)
   //app.get('/blah', requireAuth, Foo.bar)
 }

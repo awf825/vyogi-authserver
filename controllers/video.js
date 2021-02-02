@@ -19,7 +19,7 @@ var d = new Date().getDate();
 exports.buildVideo = async function(req, res, next) {
   const authorized = await User.findOne({ "_id": req.body.user}).exec();
   if (authorized && authorized.isAdmin) {
-    let url = 'https://api.daily.co/v1/rooms';
+    let url = config.dailyUrl;
     
     let options = {
       method: 'POST',
@@ -36,21 +36,25 @@ exports.buildVideo = async function(req, res, next) {
 
     const room = await fetch(url, options)
      .then(res => res.json())
-     .catch(err => response.status(500).json({ error: err.message }))
+     // .catch(err => response.status(500).json({ error: err.message }))
 
     let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
-    const roomFile = fs.writeFile('room.json', JSON.stringify(room))
+
     const bucketParams = {
       Bucket: config.resourceBucket,
       Key: `${y}/${m}/${d}/${currentLessonId}`,
-      Body: roomFile
+      Body: room.url
     };
 
     s3.putObject(bucketParams, function(err, data) {
-      if (err) { return res.send({"message":err}) }
-    });
-
-    res.json(room);
+      if (err) { res.send({"message":err}) }
+      else {
+        res.json({
+          "room": room,
+          "bucket": data
+        })
+      }
+    })
   } else {
     res.sendStatus(406);
   }
@@ -60,20 +64,22 @@ exports.requestVideo = async function(req, res, next) {
   let currentLesson = await Lesson.find( { startTime: { $lt: now } } ).sort( { $natural: -1 } ).limit(1);
   if (typeof(currentLesson) !== undefined) {
     const codes = currentLesson[0].bookings.map(bkg=>bkg.code)
-    if (codes.includes(req.body.code)) {
-      let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
-      const bucketParams = {
-        Bucket: config.resourceBucket,
-        Key: `${y}/${m}/${d}/${currentLessonId}`
-      }
+    
+  }
+    // if (codes.includes(req.body)) {
+    //   const bucketParams = {
+    //     Bucket: config.resourceBucket,
+    //     Key: `${y}/${m}/${d}/${currentLessonId}`
+    //   }
 
-      s3.getObject(bucketParams, function(err, data) {
-        if (err) { return res.send({"message":"Lesson is not live yet"}) }
-        res.json(data.createReadStream())
-      });
-    } else {
-      return res.json({"message":"code is invalid"})
-    }
+
+    //   const bucketResponse = await s3.getObject(bucketParams, function(err, data) {
+    //     if (err) { return res.send({"message":"Lesson is not live yet"}) }
+    //     res.json(data.Body)
+    //   });
+    // } else {
+    //   return res.json({"message":"code is invalid"})
+    // }
   } else {
     return res.json({"message":"lesson is undefined"})
   }
