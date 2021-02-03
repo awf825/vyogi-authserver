@@ -1,11 +1,16 @@
 ### REMINDERS
-   Fire up mongod like:
+   Setup (assuming you've installed mongod-community):
+   In the root of the repo (simple-node) run:
    ```
-   mongod --dbpath=/path/to/mongopackage
-   (stop forgetting where this is...)
+   npm install
+   npm run dev 
+   (open new pane here)
+   mongod --dbpath=/path/to/mongodata
    ```
+   Local express should run on port 3090; if you want to change that just let
+   the front end know.
 
-   Good script:
+   Good (enough) script:
    ```
    var getAllIds = db.getCollection('x').find({}, {_id:1}).map(function(item){ return item._id; })
    ```
@@ -32,6 +37,7 @@
    ```
    User.update({"email": "client1@clientmail.com"}, {$addToSet: {bookings: {bookingId: "bkg", lessonId: "lsn"}}});
    ```
+
    Good thing to have around when dealing with time in the backend 
    ```
    new Date(1612066842332).toLocaleString('en-US', { timeZone: 'America/New_York' })
