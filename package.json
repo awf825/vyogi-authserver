@@ -8,6 +8,7 @@
     "dev": "nodemon app.js",
     "start": "node app.js"
   },
+  "engines" : { "node" : ">=0.12" },
   "author": "",
   "license": "ISC",
   "dependencies": {
