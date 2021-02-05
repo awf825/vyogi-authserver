@@ -2,7 +2,6 @@ const config = require('../config.js');
 const User = require('../models/user.js');
 const Lesson = require('../models/lesson.js');
 const AWS = require('aws-sdk');
-const fetch = require('node-fetch');
 const fs = require('fs');
 
 const s3 = new AWS.S3({
