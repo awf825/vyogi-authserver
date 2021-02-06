@@ -97,4 +97,4 @@
    });
 ``` 
 
-   https://docs.mongodb.com/manual/reference/operator/update/pull/
+When deploying to beanstalk may need to reboot instance if health is severe (cached deployments).

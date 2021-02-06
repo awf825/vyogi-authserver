@@ -5,8 +5,8 @@ const AWS = require('aws-sdk');
 const fs = require('fs');
 
 const s3 = new AWS.S3({
-  accessKeyId: config.accessKeyId,
-  secretAccessKey: config.secretAccessKey
+  accessKeyId: process.env.AWS_ACCESS_KEY || config.accessKeyId,
+  secretAccessKey: process.env.AWS_SECRET || config.secretAccessKey
 }) 
 
 let now = + new Date();
@@ -18,13 +18,14 @@ var d = new Date().getDate();
 exports.buildVideo = async function(req, res, next) {
   const authorized = await User.findOne({ "_id": req.body.user}).exec();
   if (authorized && authorized.isAdmin) {
-    let url = config.dailyUrl;
+    let url = process.env.DAILY_URL || config.dailyUrl;
+    let videoToken = process.env.DAILY_API_KEY || config.dailyVideoApiKey
     
     let options = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json', 
-        Authorization: `Bearer ${config.dailyVideoApiKey}`
+        Authorization: `Bearer ${videoToken}`
       },
       body: JSON.stringify({
         properties: { 
@@ -40,7 +41,7 @@ exports.buildVideo = async function(req, res, next) {
     let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
 
     const bucketParams = {
-      Bucket: config.resourceBucket,
+      Bucket: 'lesson-urls',
       Key: `${y}/${m}/${d}/${currentLessonId}`,
       Body: room.url
     };
@@ -66,7 +67,7 @@ exports.requestVideo = async function(req, res, next) {
     const codes = currentLesson[0].bookings.map(bkg=>bkg.code)
     if (codes.includes(req.body.code)) {
       const bucketParams = {
-        Bucket: config.resourceBucket,
+        Bucket: 'lesson-urls',
         Key: `${y}/${m}/${d}/${currentLessonId}`
       }
       const bucketResponse = await s3.getObject(bucketParams, function(err, data) {

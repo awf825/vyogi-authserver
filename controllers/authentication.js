@@ -4,6 +4,7 @@ const config = require('../config');
 
 function tokenForUser(user) {
   const now = + new Date();
+  const secret = process.env.JWT_SECRET || config.secret
   // aud should change when process.env changes
   return jwt.encode(
     { 
@@ -11,7 +12,7 @@ function tokenForUser(user) {
       iat: now,
       exp: now+3600000
     }, 
-    config.secret
+    secret
   );
 }
 
@@ -41,8 +42,8 @@ exports.signup = function(req, res, next) {
     // If a user with email does NOT exist, create and save user record
     const user = new User({
       email: email,
-      password: password,
-      isAdmin: config.adminWhitelist.includes(email)
+      password: password
+      // isAdmin: config.adminWhitelist.includes(email)
     });
 
     user.save(function(err) {
