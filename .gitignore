@@ -1,6 +1,8 @@
 node_modules/ 
 schemas/
 .elasticbeanstalk/
+.env
+.ebignore/
 Buildfile
 
 config.js

@@ -2,26 +2,25 @@ const User = require('../models/user.js');
 const Lesson = require('../models/lesson.js');
 const AWS = require('aws-sdk');
 const fs = require('fs');
-if (!process.env) {
-  const config = require('../config');
-}
+const accessKey = process.env.AWS_ACCESS_KEY
+const secretKey = process.env.AWS_SECRET
 
 const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY || config.accessKeyId,
-  secretAccessKey: process.env.AWS_SECRET || config.secretAccessKey
+  accessKeyId: accessKey,
+  secretAccessKey: secretKey
 }) 
 
 let now = + new Date();
 var y = new Date().getFullYear();
-// JS returns 0 for Jan
+// JS returns 0 for January
 var m = ( new Date().getMonth() + 1 );
 var d = new Date().getDate();
 
 exports.buildVideo = async function(req, res, next) {
   const authorized = await User.findOne({ "_id": req.body.user}).exec();
   if (authorized && authorized.isAdmin) {
-    let url = process.env ? process.env.DAILY_URL : config.dailyUrl;
-    let videoToken = process.env ? process.env.DAILY_API_KEY : config.dailyVideoApiKey
+    let url = process.env.DAILY_URL
+    let videoToken = process.env.DAILY_API_KEY
     
     let options = {
       method: 'POST',

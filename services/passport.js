@@ -3,9 +3,7 @@ const User = require('../models/user');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const LocalStrategy = require('passport-local');
-if (!process.env) {
-  const config = require('../config');
-}
+const jwtSecret = process.env.JWT_SECRET
 
 // two strategies used here: verify with user token or with local input
 // after local startegy parses request, it sends email and password to callback
@@ -24,11 +22,9 @@ const localLogin = new LocalStrategy(localOptions, function(email, password, don
   })
 })
 
-// secretOrKey: process.env ? process.env.JWT_SECRET : config.secret
-
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: jwtSecret
 };
 
 // done is like next, error handling/catch

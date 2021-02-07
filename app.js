@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const router = require('./router.js');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const url = process.env.MONGODB_URL || 'mongodb://localhost:auth/auth'
+const url = process.env.MONGODB_URL
 const app = express();
 
 try {
@@ -26,7 +26,7 @@ app.use(bodyParser.json({ type: '*/*' }));
 
 router(app);
 
-const port = process.env.PORT || 3090;
+const port = process.env.PORT;
 const server = http.createServer(app);
 server.listen(port);
 console.log('server listening on:', port);

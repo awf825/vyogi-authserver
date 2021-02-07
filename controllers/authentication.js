@@ -1,14 +1,12 @@
-// test
+require('dotenv').config()
 const jwt = require('jwt-simple');
 const User = require('../models/user.js');
-if (!process.env) {
-  const config = require('../config');
-}
-// const config = require('../config');
+//const webEnvs = ['beta', 'production']
+const secret = process.env.JWT_SECRET
 
 function tokenForUser(user) {
   const now = + new Date();
-  const secret = process.env ? process.env.JWT_SECRET : config.secret
+  // const secret = (webEnvs.includes(process.env.NODE_ENV) ? process.env.JWT_SECRET : config.secret)
   // aud should change when process.env changes
   return jwt.encode(
     { 
