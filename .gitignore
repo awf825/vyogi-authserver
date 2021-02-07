@@ -1,5 +1,6 @@
 node_modules/
 schemas/ 
 seeds/
+.elasticbeanstalk/
 
 config.js
