@@ -36,70 +36,29 @@ exports.signup = async function(req, res, next) {
   if (password !== passwordConf) {
     return res.sendStatus(406)
   }
-  // See if a user with the given email exists
-  // User.findOne({ email: email }, function(err, existingUser) {
-  //   if (err) { return next(err); }
-  //   // If a user with email does exist, return an error
-  //   if (existingUser) {
-  //     return res.sendStatus(422)
-  //   }
-  //   // If a user with email does NOT exist, create and save user record
-  //   const user = new User({
-  //     email: email,
-  //     password: password
-  //     // isAdmin: config.adminWhitelist.includes(email)
-  //   });
 
-  try {
-    await User.findOne({ email: email }, function(err, existingUser) {
+  await User.findOne({ email: email }, function(err, existingUser) {
+    if (err) { return next(err); }
+    // If a user with email does exist, return an error
+    if (existingUser) {
+      return res.sendStatus(422)
+    }
+    // If a user with email does NOT exist, create and save user record
+    const user = new User({
+      email: email,
+      password: password
+      // isAdmin: config.adminWhitelist.includes(email)
+    });
+
+    user.save(function(err) {
       if (err) { return next(err); }
-      // If a user with email does exist, return an error
-      if (existingUser) {
-        return res.sendStatus(422)
-      }
-      // If a user with email does NOT exist, create and save user record
-      const user = new User({
-        email: email,
-        password: password
-        // isAdmin: config.adminWhitelist.includes(email)
-      });
-
-      user.save(function(err) {
-        if (err) { return next(err); }
-        // Repond to request indicating the user was created
-        res.json({ 
-          token: tokenForUser(user),
-          _id: user._id
-        });
+      // Repond to request indicating the user was created
+      res.json({ 
+        token: tokenForUser(user),
+        _id: user._id
       });
     });
-  } catch(e) {
-    res.json({"sorry":"Ibroke"})
-  }
-
-  // See if a user with the given email exists
-  // User.findOne({ email: email }, function(err, existingUser) {
-  //   if (err) { return next(err); }
-  //   // If a user with email does exist, return an error
-  //   if (existingUser) {
-  //     return res.sendStatus(422)
-  //   }
-  //   // If a user with email does NOT exist, create and save user record
-  //   const user = new User({
-  //     email: email,
-  //     password: password
-  //     // isAdmin: config.adminWhitelist.includes(email)
-  //   });
-
-  //   user.save(function(err) {
-  //     if (err) { return next(err); }
-  //     // Repond to request indicating the user was created
-  //     res.json({ 
-  //       token: tokenForUser(user),
-  //       _id: user._id
-  //     });
-  //   });
-  // });
+  })
 }
 
 exports.signout = function(req, res, next) {

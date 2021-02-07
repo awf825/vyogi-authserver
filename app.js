@@ -8,7 +8,9 @@ const url = process.env.MONGODB_URL || 'mongodb://localhost:auth/auth'
 const app = express();
 
 try {
-	mongoose.connect( url, {useNewUrlParser: true, useUnifiedTopology: true }); 
+
+	// mongoose.connect( url, {useNewUrlParser: true, useUnifiedTopology: true }); 
+	mongoose.connect( url, { useNewUrlParser: true }); 
 
 	const connection = mongoose.connection;
 
