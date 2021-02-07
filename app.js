@@ -1,31 +1,32 @@
 const express = require('express');
 const http = require('http'); 
-const logger = require('heroku-logger')
-
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
 const router = require('./router.js');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const url = process.env.MONGODB_URL || 'mongodb://localhost:auth/auth'
+const url = process.env.MONGODB_URL
 const app = express();
-//mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 
 try {
-	mongoose.connect( url, {useNewUrlParser: true, useUnifiedTopology: true}, () =>
-		console.log("connected")
-	);    
+
+	// mongoose.connect( url, {useNewUrlParser: true, useUnifiedTopology: true }); 
+	mongoose.connect( url, { useNewUrlParser: true }); 
+
+	const connection = mongoose.connection;
+
+	connection.once("open", function() {
+	  console.log("MongoDB database connection established successfully");
+	});
 } catch (error) { 
 	console.log("could not connect, error:", error);    
 }
 
-app.use(morgan('combined'));
 app.use(cors());
 app.use(bodyParser.json({ type: '*/*' }));
 
 router(app);
 
-const port = process.env.PORT || 3090;
+const port = process.env.PORT;
 const server = http.createServer(app);
 server.listen(port);
 console.log('server listening on:', port);

@@ -1,9 +1,12 @@
+require('dotenv').config()
 const jwt = require('jwt-simple');
 const User = require('../models/user.js');
-const config = require('../config');
+//const webEnvs = ['beta', 'production']
+const secret = process.env.JWT_SECRET
 
 function tokenForUser(user) {
   const now = + new Date();
+  // const secret = (webEnvs.includes(process.env.NODE_ENV) ? process.env.JWT_SECRET : config.secret)
   // aud should change when process.env changes
   return jwt.encode(
     { 
@@ -11,7 +14,7 @@ function tokenForUser(user) {
       iat: now,
       exp: now+3600000
     }, 
-    config.secret
+    secret
   );
 }
 
@@ -23,7 +26,7 @@ exports.signin = function(req, res, next) {
   })
 }
 
-exports.signup = function(req, res, next) {
+exports.signup = async function(req, res, next) {
   const email = req.body.email;
   const password = req.body.password;
   const passwordConf = req.body.passwordConf
@@ -31,8 +34,8 @@ exports.signup = function(req, res, next) {
   if (password !== passwordConf) {
     return res.sendStatus(406)
   }
-  // See if a user with the given email exists
-  User.findOne({ email: email }, function(err, existingUser) {
+
+  await User.findOne({ email: email }, function(err, existingUser) {
     if (err) { return next(err); }
     // If a user with email does exist, return an error
     if (existingUser) {
@@ -41,8 +44,8 @@ exports.signup = function(req, res, next) {
     // If a user with email does NOT exist, create and save user record
     const user = new User({
       email: email,
-      password: password,
-      isAdmin: config.adminWhitelist.includes(email)
+      password: password
+      // isAdmin: config.adminWhitelist.includes(email)
     });
 
     user.save(function(err) {
@@ -53,7 +56,7 @@ exports.signup = function(req, res, next) {
         _id: user._id
       });
     });
-  });
+  })
 }
 
 exports.signout = function(req, res, next) {

@@ -1,6 +1,11 @@
-node_modules/
-schemas/ 
-seeds/
+node_modules/ 
+schemas/
 .elasticbeanstalk/
+.env
+.ebignore/
 
 config.js
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

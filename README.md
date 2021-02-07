@@ -2,11 +2,16 @@
    Setup (assuming you've installed mongod-community):
    In the root of the repo (simple-node) run:
    ```
+   git checkout beta 
+   git pull origin beta 
+   git checkout -b <your-work-branch>
    npm install
    npm run dev 
    (open new pane here)
    mongod --dbpath=/path/to/mongodata
    ```
+   ONLY WORK ON YOUR BRANCH. 
+   
    Local express should run on port 3090; if you want to change that just let
    the front end know.
 
@@ -17,6 +22,9 @@
 
    For big file seeding (mongo shell):
    ```
+   node seeds/lessonSeed.js (make sure you make a schemas dir and add it to gitignore)
+
+   (mongo shell)
    var file = cat('./schemas/lessons/Sat\ Jan\ 30\ 2021\ 15:00:44\ GMT-0500\ \(Eastern\ Standard\ Time\).json');
 
    var o = JSON.parse(file);
@@ -89,4 +97,13 @@
    });
 ``` 
 
-   https://docs.mongodb.com/manual/reference/operator/update/pull/
+When deploying to beanstalk may need to reboot instance if health is severe (cached deployments).
+<<<<<<< Updated upstream
+=======
+
+A good way to troubleshoot running the app is sshing into the instance(s) and running this command:
+```
+cd ../../var/app/current && npm start
+```
+You can see if the app itself is actually not shitting the bed before you delve into network/transport research.
+>>>>>>> Stashed changes
