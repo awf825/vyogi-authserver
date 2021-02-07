@@ -1,17 +1,20 @@
 const mongoose = require('mongoose');
-const config = require('../config.js')
 const Booking = require('../models/booking.js')
 const User = require('../models/user.js')
 const Lesson = require('../models/lesson.js')
+if (!process.env) {
+  const config = require('../config');
+}
+// const config = require('../config.js')
 
 exports.serveToken = function(req, res, next) {
-	const payload = process.env.STRIPE_PUBLISHABLE_KEY_TEST || config.stripePublishableKeyTest
+	const payload = process.env ? process.env.STRIPE_PUBLISHABLE_KEY_TEST : config.stripePublishableKeyTest
 	res.json(payload)
 }
 
 exports.charge = async function(req, res, next) {
 	const Stripe = require('stripe');
-	const secret = process.env.STRIPE_SECRET_KEY_TEST || config.stripeSecretKeyTest
+	const secret = process.env ? process.env.STRIPE_SECRET_KEY_TEST : config.stripeSecretKeyTest
 	const stripe = Stripe(secret);
 	const lesson = req.body.lesson;
 	const user = req.body.user;

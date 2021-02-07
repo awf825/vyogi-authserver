@@ -8,9 +8,13 @@ const url = process.env.MONGODB_URL || 'mongodb://localhost:auth/auth'
 const app = express();
 
 try {
-	mongoose.connect( url, {useNewUrlParser: true, useUnifiedTopology: true}, () =>
-		console.log("connected")
-	);    
+	mongoose.connect( url, {useNewUrlParser: true, useUnifiedTopology: true }); 
+
+	const connection = mongoose.connection;
+
+	connection.once("open", function() {
+	  console.log("MongoDB database connection established successfully");
+	});
 } catch (error) { 
 	console.log("could not connect, error:", error);    
 }

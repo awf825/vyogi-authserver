@@ -27,7 +27,9 @@ const userSchema = new Schema({
   },
   isAdmin: Boolean,
   bookings: Array
-})
+},
+  { collection: "user" }
+)
 
 // same as before_save callback in rails (presave)
 userSchema.pre('save', function(next) {
