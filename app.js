@@ -4,13 +4,13 @@ const bodyParser = require('body-parser');
 const router = require('./router.js');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const url = process.env.MONGODB_URL
 const app = express();
 
-try {
+const url = process.env.MONGODB_URL;
 
+try {
 	// mongoose.connect( url, {useNewUrlParser: true, useUnifiedTopology: true }); 
-	mongoose.connect( url, { useNewUrlParser: true }); 
+	mongoose.connect( url, { useNewUrlParser: true, useUnifiedTopology: true }); 
 
 	const connection = mongoose.connection;
 

@@ -2,8 +2,13 @@ const Lesson = require('../models/lesson.js');
 const mongoose = require('mongoose');
 
 exports.getAll = async function(req, res, next) {
-	let payload = await Lesson.find({});
-	res.json({ lessons: payload })
+	Lesson.find({}, function(err, result) {
+	    if (err) {
+	      console.log(err);
+	    } else {
+	      res.json(result);
+	    }
+	});
 }
 
 // exports.getCurrentLesson = async function(req, res, next) {

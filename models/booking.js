@@ -7,6 +7,8 @@ let bookingSchema = new Schema({
 	userId: String,
 	lessonId: String,
 	code: String
-})
+},
+	{ collection: "booking" }
+)
 
 module.exports = mongoose.model('booking', bookingSchema)

@@ -9,23 +9,6 @@ const lessonSchema = new Schema({
 	startTime: Number,
 	cost: Number,
 	bookings: Array
-	  // bookings: [
-  //   {
-  //     payment_made: true,
-  //     cancelled: true,
-  //     userId: 1
-  //   },
-  //   {
-  //     payment_made: true,
-  //     cancelled: true,
-  //     userId: 2
-  //   }
-  //   ...
-  // ]
-	// bookings: [{
-	//     type: Schema.Types.ObjectId,
-	//     ref: "Booking"
- //    }]
 })
 
 module.exports = mongoose.model('lesson', lessonSchema)
