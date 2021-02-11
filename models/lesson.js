@@ -9,6 +9,8 @@ const lessonSchema = new Schema({
 	startTime: Number,
 	cost: Number,
 	bookings: Array
-})
+},
+	{ collection: 'lesson' }
+)
 
 module.exports = mongoose.model('lesson', lessonSchema)
