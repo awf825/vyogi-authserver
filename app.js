@@ -21,7 +21,12 @@ try {
 	console.log("could not connect, error:", error);    
 }
 
-const allowedOrigins = ['http://localhost:3000', 'https://www.yogastaging.net']
+const allowedOrigins = [
+	'http://localhost:3000', 
+	'https://www.yogastaging.net', 
+	'https://www.yogawithlan.com'
+]
+
 app.use(cors({
 	origin: function(origin, callback) {
 		// allow requests with no origin (like mobile apps or curl requests)
