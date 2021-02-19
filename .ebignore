@@ -3,3 +3,4 @@ schemas/
 Procfile
 
 config.js
+.env
