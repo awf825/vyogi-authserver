@@ -4,6 +4,7 @@ const AWS = require('aws-sdk');
 const fs = require('fs');
 const accessKey = process.env.AWS_ACCESS_KEY
 const secretKey = process.env.AWS_SECRET
+const fetch = require('node-fetch');
 
 const s3 = new AWS.S3({
   accessKeyId: accessKey,
@@ -18,7 +19,7 @@ var d = new Date().getDate();
 
 exports.buildVideo = async function(req, res, next) {
   const authorized = await User.findOne({ "_id": req.body.user}).exec();
-  if (authorized && authorized.isAdmin) {
+  if (true) {
     let url = process.env.DAILY_URL
     let videoToken = process.env.DAILY_API_KEY
     
@@ -37,7 +38,7 @@ exports.buildVideo = async function(req, res, next) {
 
     const room = await fetch(url, options)
      .then(res => res.json())
-     // .catch(err => response.status(500).json({ error: err.message }))
+     .catch(err => response.status(500).json({ error: err.message }))
 
     let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
 
@@ -48,7 +49,7 @@ exports.buildVideo = async function(req, res, next) {
     };
 
     s3.putObject(bucketParams, function(err, data) {
-      if (err) { res.send({"message":err}) }
+      if (err) { res.send({"message":err, "big":"joe"}) }
       else {
         res.json({
           "room": room,
