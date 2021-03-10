@@ -19,7 +19,7 @@ var d = new Date().getDate();
 
 exports.buildVideo = async function(req, res, next) {
   const authorized = await User.findOne({ "_id": req.body.user}).exec();
-  if (authorized) {
+  if (authorized.isAdmin) {
     let url = process.env.DAILY_URL
     let videoToken = process.env.DAILY_API_KEY
     
@@ -58,7 +58,7 @@ exports.buildVideo = async function(req, res, next) {
       }
     })
   } else {
-    res.sendStatus(406);
+    res.send({"message":"You are not authorized to perform this action."});
   }
 }
 
