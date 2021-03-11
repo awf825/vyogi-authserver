@@ -63,6 +63,9 @@ exports.buildVideo = async function(req, res, next) {
 }
 
 exports.requestVideo = async function(req, res, next) {
+  // if we're opting for the google calendar, this logic can be done away with
+  // can link bookings and users by lesson id attached to google events
+  // LessonControl.getCurrentLesson or something like that
   let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
   let currentLesson = await Lesson.find( { startTime: { $lt: now } } ).sort( { $natural: -1 } ).limit(1);
   if (typeof(currentLesson) !== undefined) {

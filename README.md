@@ -98,12 +98,14 @@
 ``` 
 
 When deploying to beanstalk may need to reboot instance if health is severe (cached deployments).
-<<<<<<< Updated upstream
-=======
 
 A good way to troubleshoot running the app is sshing into the instance(s) and running this command:
 ```
 cd ../../var/app/current && npm start
 ```
 You can see if the app itself is actually not shitting the bed before you delve into network/transport research.
->>>>>>> Stashed changes
+
+Here's one! Have to do this to update heroku correctly:
+```
+git push heroku beta:master
+```
