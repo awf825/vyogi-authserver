@@ -32,7 +32,8 @@ exports.charge = async function(req, res, next) {
 		payment_made: true,
 		cancelled: false,
 		userId: user,
-		lessonId: lesson
+		lessonId: lesson,
+		createdAt: new Date()
 	});
 
 	try {
@@ -43,34 +44,23 @@ exports.charge = async function(req, res, next) {
 	  		description: 'My Test Charge API docs',
 		});
 	} catch (err) {
-		res.send(500, { message: 'broke on stripe' })
+		res.send(500, { message: err })
 	}
 
 	await newBooking.save(function (err, booking) {
 		if (err) return handleError(err);
-		let code = Math.random().toString(36).substring().split('.')[1];
+		var str = Math.random().toString(20).split('.')[1]
+		let code = str.slice(-4) + str.slice(0, 4) 
+		//let code = Math.random().toString(36).substring().split('.')[1];
 		User.findOneAndUpdate(
 			userQuery, 
 			{ 
 				"$push": { 
 					"bookings": { 
 						"_id": booking._id, 
-						"lessonId": mongoose.Types.ObjectId(lesson),
-						"code": code
-					}
-				} 
-			}, function(err, doc) {
-				if (err) return res.send(500, {error: err});
-			} 
-		);
-		Lesson.findOneAndUpdate(
-			lessonQuery, 
-			{ 
-				"$push": { 
-					"bookings": { 
-						"_id": booking._id, 
-						"userId": mongoose.Types.ObjectId(user),
-						"code": code
+						"lessonId": lesson,
+						"code": code,
+						"createdAt": new Date()
 					}
 				} 
 			}, function(err, doc) {

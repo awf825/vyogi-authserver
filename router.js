@@ -19,7 +19,7 @@ module.exports = function(app) {
   app.get('/lessons', requireAuth, LessonControl.getAll)
   app.get('/stripe', requireAuth, ChargeControl.serveToken)
 
-  app.get('/calendar', LessonControl.getGoogleCalendar)
+  app.get('/calendar', requireAuth, LessonControl.getGoogleCalendar)
   app.get('/test', LessonControl.getCurrentLesson)
 
   app.post('/charges', requireAuth, ChargeControl.charge)

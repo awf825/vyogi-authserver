@@ -38,8 +38,8 @@ exports.getGoogleCalendar = async function(req, res, next) {
     			{ 
     				"id": item.id,
     				"title": item.summary,
-    				"start": item.start.dateTime, 
-    				"end": item.end.dateTime
+    				"start": + new Date(item.start.dateTime), 
+    				"end": + new Date(item.end.dateTime)
     			}
     		)
     	})

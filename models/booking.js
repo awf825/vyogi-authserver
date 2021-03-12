@@ -6,7 +6,8 @@ let bookingSchema = new Schema({
 	cancelled: Boolean,
 	userId: String,
 	lessonId: String,
-	code: String
+	code: String,
+	createdAt: Date
 },
 	{ collection: "booking" }
 )
