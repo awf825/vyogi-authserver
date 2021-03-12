@@ -1,5 +1,6 @@
 const User = require('../models/user.js');
 const Lesson = require('../models/lesson.js');
+const LessonControl = require('./lesson.js');
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const accessKey = process.env.AWS_ACCESS_KEY
@@ -10,6 +11,15 @@ const s3 = new AWS.S3({
   accessKeyId: accessKey,
   secretAccessKey: secretKey
 }) 
+
+const { google } = require('googleapis')
+const { OAuth2 } = google.auth
+const OAuth2ClientId = process.env.GOOGLE_OAUTH2_CLIENT_ID;
+const OAuth2Secret = process.env.GOOGLE_OAUTH2_CLIENT_SECRET;
+const OAuth2RefreshToken = process.env.GOOGLE_OAUTH2_CLIENT_REFRESH_TOKEN;
+const OAuth2Client = new OAuth2(OAuth2ClientId, OAuth2Secret);
+OAuth2Client.setCredentials({ refresh_token: OAuth2RefreshToken })
+const calendar = google.calendar({ version: 'v3', auth: OAuth2Client })
 
 let now = + new Date();
 var y = new Date().getFullYear();
@@ -40,23 +50,27 @@ exports.buildVideo = async function(req, res, next) {
      .then(res => res.json())
      .catch(err => response.status(500).json({ error: err.message }))
 
-    let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
+    //let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
+    const currentLesson = calendar
+    if (currentLesson) {
+      res.json({"currentLesson":currentLesson})
+    }
 
-    const bucketParams = {
-      Bucket: 'lesson-urls',
-      Key: `${y}/${m}/${d}/${currentLessonId}`,
-      Body: room.url
-    };
+    // const bucketParams = {
+    //   Bucket: 'lesson-urls',
+    //   Key: `${y}/${m}/${d}/${currentLesson.id}`,
+    //   Body: room.url
+    // };
 
-    s3.putObject(bucketParams, function(err, data) {
-      if (err) { res.send({"message":err, "big":"joe"}) }
-      else {
-        res.json({
-          "room": room,
-          "bucket": data
-        })
-      }
-    })
+    // s3.putObject(bucketParams, function(err, data) {
+    //   if (err) { res.send({"message":err, "big":"joe"}) }
+    //   else {
+    //     res.json({
+    //       "room": room,
+    //       "bucket": data
+    //     })
+    //   }
+    // })
   } else {
     res.send({"message":"You are not authorized to perform this action."});
   }

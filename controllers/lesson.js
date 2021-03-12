@@ -49,11 +49,14 @@ exports.getGoogleCalendar = async function(req, res, next) {
 }
 
 // change this to local export
-exports.getCurrentLesson = async function(req, res, next) {
+exports.getCurrentLesson = async function() {
+	//return "bigjoe";
 	var et = new Date();
 	et.setHours( et.getHours() + 2 )
 
-	calendar.events.list({
+	// let lesson;
+
+	await calendar.events.list({
 	    calendarId: 'primary',
 	    timeMin: (new Date()).toISOString(),
 	    timeMax: et.toISOString(),
@@ -61,17 +64,10 @@ exports.getCurrentLesson = async function(req, res, next) {
     	singleEvents: true,
     	orderBy: 'startTime'
 	}, (err, resp) => {
-    	if (err) return console.log('The API returned an error: ' + err)
-    	const item = resp.data.items[0];
-    	res.json([
-	    	{ 
-				"id": item.id,
-				"title": item.summary,
-				"start": item.start.dateTime, 
-				"end": item.end.dateTime
-	    	}
-    	])
+    	if (err) return err
+    	//return resp.data.items[0];
+    	return err;
     });
+
+    // return lesson;
 }
-
-
