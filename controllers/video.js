@@ -1,5 +1,6 @@
 const User = require('../models/user.js');
 const Lesson = require('../models/lesson.js');
+const Booking = require('../models/booking.js');
 const LessonControl = require('./lesson.js');
 const AWS = require('aws-sdk');
 const fs = require('fs');
@@ -27,76 +28,103 @@ var y = new Date().getFullYear();
 var m = ( new Date().getMonth() + 1 );
 var d = new Date().getDate();
 
+var et = new Date();
+et.setHours( et.getHours() + 1 )
+
 exports.buildVideo = async function(req, res, next) {
-  const authorized = await User.findOne({ "_id": req.body.user}).exec();
-  if (authorized.isAdmin) {
-    let url = process.env.DAILY_URL
-    let videoToken = process.env.DAILY_API_KEY
-    
-    let options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json', 
-        Authorization: `Bearer ${videoToken}`
-      },
-      body: JSON.stringify({
-        properties: { 
-          exp: now+3600000
+  calendar.events.list({
+      calendarId: 'primary',
+      timeMin: (new Date()).toISOString(),
+      timeMax: et.toISOString(),
+      maxResults: 9999,
+      singleEvents: true,
+      orderBy: 'startTime'
+  }, async (err, resp) => {
+      if (err) { res.send({"message":err}) }
+      var lesson = resp.data.items[0];
+      // basically saying if I don't have any lessons 'on the radar', bounce this request line 91
+      if (lesson !== undefined) {
+        // you still need to be an admin to build a lesson, if not gt bounced to line 88
+        const authorized = await User.findOne({ "_id": req.body.user}).exec();
+        // const authorized = await User.findOne({ "_id": "6024afd3e0f778159f23421a"}).exec();
+        if (authorized.isAdmin) {
+          let url = process.env.DAILY_URL
+          let videoToken = process.env.DAILY_API_KEY
+
+          let options = {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json', 
+              Authorization: `Bearer ${videoToken}`
+            },
+            body: JSON.stringify({
+              properties: { 
+                exp: now+3600000
+              }
+            })
+          };
+
+          // get the room and tag the bucket with the lesson id obtained in the call to 
+          // google
+          const room = await fetch(url, options)
+           .then(response => response.json())
+           .catch(err => res.status(500).json({ "message": err.message }))
+
+          const bucketParams = {
+            Bucket: 'lesson-urls',
+            Key: `${y}/${m}/${d}/${lesson.id}`,
+            Body: room.url
+          };
+
+          s3.putObject(bucketParams, function(err, data) {
+            if (err) { res.send({"message":err}) }
+            else {
+              res.json({
+                "room": room,
+                "bucket": data
+              })
+            }
+          })
+        } else {
+          res.send({"message":"You are not authorized to perform this action."});
         }
-      })
-    };
-
-    const room = await fetch(url, options)
-     .then(res => res.json())
-     .catch(err => response.status(500).json({ error: err.message }))
-
-    //let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
-    const currentLesson = calendar
-    if (currentLesson) {
-      res.json({"currentLesson":currentLesson})
-    }
-
-    // const bucketParams = {
-    //   Bucket: 'lesson-urls',
-    //   Key: `${y}/${m}/${d}/${currentLesson.id}`,
-    //   Body: room.url
-    // };
-
-    // s3.putObject(bucketParams, function(err, data) {
-    //   if (err) { res.send({"message":err, "big":"joe"}) }
-    //   else {
-    //     res.json({
-    //       "room": room,
-    //       "bucket": data
-    //     })
-    //   }
-    // })
-  } else {
-    res.send({"message":"You are not authorized to perform this action."});
-  }
+      } else {
+        res.json({"message":"There is no lesson to build at this time."})
+      }
+  });
 }
 
 exports.requestVideo = async function(req, res, next) {
-  // if we're opting for the google calendar, this logic can be done away with
-  // can link bookings and users by lesson id attached to google events
-  // LessonControl.getCurrentLesson or something like that
-  let currentLessonId = await Lesson.find( { startTime: { $lt: now } }, {'_id': 1} ).sort( { $natural: -1 } ).limit(1);
-  let currentLesson = await Lesson.find( { startTime: { $lt: now } } ).sort( { $natural: -1 } ).limit(1);
-  if (typeof(currentLesson) !== undefined) {
-    const codes = currentLesson[0].bookings.map(bkg=>bkg.code)
-    if (codes.includes(req.body.code)) {
-      const bucketParams = {
-        Bucket: 'lesson-urls',
-        Key: `${y}/${m}/${d}/${currentLessonId}`
+  calendar.events.list({
+      calendarId: 'primary',
+      timeMin: (new Date()).toISOString(),
+      timeMax: et.toISOString(),
+      maxResults: 9999,
+      singleEvents: true,
+      orderBy: 'startTime'
+  }, async (err, resp) => {
+      if (err) { res.send({"message":err}) }
+      var lesson = resp.data.items[0]
+      if (lesson !== undefined) {
+        var codesByLessonBookings = await Booking.find({"lessonId":lesson.id})
+        const codes = codesByLessonBookings.map(bkg=>bkg.code)
+
+        if (codes.includes(req.body.code)) {
+          const bucketParams = {
+            Bucket: 'lesson-urls',
+            Key: `${y}/${m}/${d}/${lesson.id}`
+          }
+
+          const bucketResponse = await s3.getObject(bucketParams, function(err, data) {
+            if (err) { return res.send({"message":err}) }
+            res.json(data.Body.toString('utf-8'))
+          });
+          
+        } else {
+          return res.json({"message":"code is invalid"})
+        }
+      } else {
+        res.json({"message":"There is no lesson to request at this time."})
       }
-      const bucketResponse = await s3.getObject(bucketParams, function(err, data) {
-        if (err) { return res.send({"message":err}) }
-        res.json(data.Body.toString('utf-8'))
-      });
-    } else {
-      return res.json({"message":"code is invalid"})
-    }
-  } else {
-    return res.json({"message":"lesson is undefined"})
-  }
+  })
 }

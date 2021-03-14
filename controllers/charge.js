@@ -27,12 +27,15 @@ exports.charge = async function(req, res, next) {
 	const user = req.body.user;
 	const userQuery = { "_id": user };
 	const lessonQuery = { "_id": lesson };
+	var str = Math.random().toString(20).split('.')[1]
+	let code = str.slice(-4) + str.slice(0, 4) 
 
 	const newBooking = new Booking({
 		payment_made: true,
 		cancelled: false,
 		userId: user,
 		lessonId: lesson,
+		code: code,
 		createdAt: new Date()
 	});
 
@@ -49,9 +52,6 @@ exports.charge = async function(req, res, next) {
 
 	await newBooking.save(function (err, booking) {
 		if (err) return handleError(err);
-		var str = Math.random().toString(20).split('.')[1]
-		let code = str.slice(-4) + str.slice(0, 4) 
-		//let code = Math.random().toString(36).substring().split('.')[1];
 		User.findOneAndUpdate(
 			userQuery, 
 			{ 
@@ -59,7 +59,7 @@ exports.charge = async function(req, res, next) {
 					"bookings": { 
 						"_id": booking._id, 
 						"lessonId": lesson,
-						"code": code,
+						"code": booking.code,
 						"createdAt": new Date()
 					}
 				} 

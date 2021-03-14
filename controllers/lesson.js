@@ -5,8 +5,6 @@ const { OAuth2 } = google.auth
 const OAuth2ClientId = process.env.GOOGLE_OAUTH2_CLIENT_ID;
 const OAuth2Secret = process.env.GOOGLE_OAUTH2_CLIENT_SECRET;
 const OAuth2RefreshToken = process.env.GOOGLE_OAUTH2_CLIENT_REFRESH_TOKEN;
-// should hoist google vars here and make this control pump calendar data 
-// to local methods
 const OAuth2Client = new OAuth2(OAuth2ClientId, OAuth2Secret);
 OAuth2Client.setCredentials({ refresh_token: OAuth2RefreshToken })
 const calendar = google.calendar({ version: 'v3', auth: OAuth2Client })
@@ -46,28 +44,4 @@ exports.getGoogleCalendar = async function(req, res, next) {
     	//res.json({ "prognosis":resp.data.items })
     	res.json(events)
     });
-}
-
-// change this to local export
-exports.getCurrentLesson = async function() {
-	//return "bigjoe";
-	var et = new Date();
-	et.setHours( et.getHours() + 2 )
-
-	// let lesson;
-
-	await calendar.events.list({
-	    calendarId: 'primary',
-	    timeMin: (new Date()).toISOString(),
-	    timeMax: et.toISOString(),
-	    maxResults: 9999,
-    	singleEvents: true,
-    	orderBy: 'startTime'
-	}, (err, resp) => {
-    	if (err) return err
-    	//return resp.data.items[0];
-    	return err;
-    });
-
-    // return lesson;
 }
