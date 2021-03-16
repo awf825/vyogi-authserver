@@ -1,14 +1,22 @@
 const Lesson = require('../models/lesson.js');
 const mongoose = require('mongoose');
 const { google } = require('googleapis')
-const { OAuth2 } = google.auth
-const OAuth2ClientId = process.env.GOOGLE_OAUTH2_CLIENT_ID;
-const OAuth2Secret = process.env.GOOGLE_OAUTH2_CLIENT_SECRET;
-const OAuth2RefreshToken = process.env.GOOGLE_OAUTH2_CLIENT_REFRESH_TOKEN;
-const OAuth2Client = new OAuth2(OAuth2ClientId, OAuth2Secret);
-OAuth2Client.setCredentials({ refresh_token: OAuth2RefreshToken })
-const calendar = google.calendar({ version: 'v3', auth: OAuth2Client })
+// https://medium.com/@vishnuit18/google-calendar-sync-with-nodejs-91a88e1f1f47
 // https://zapier.com/engineering/how-to-use-the-google-calendar-api/
+
+let auth = new google.auth.OAuth2(
+    process.env.GOOGLE_OAUTH2_CLIENT_ID,
+    process.env.GOOGLE_OAUTH2_CLIENT_SECRET,
+    process.env.GOOGLE_OAUTH2_REDIRECT
+);
+
+let credentials = {
+    access_token: process.env.GOOGLE_ACCESS_TOKEN,
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+};
+auth.setCredentials(credentials);
+
+const calendar = google.calendar({ version: 'v3', auth: auth })
 
 exports.getAll = async function(req, res, next) {
 	Lesson.find({}, function(err, result) {
