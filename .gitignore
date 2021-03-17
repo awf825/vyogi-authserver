@@ -5,6 +5,7 @@ schemas/
 .ebignore/
 
 config.js
+oauth2creds.json
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

@@ -1,22 +1,13 @@
+// https://isd-soft.com/tech_blog/accessing-google-apis-using-service-account-node-js/
+// https://stackoverflow.com/questions/44962062/accessing-google-calendar-api-from-node-server
+// https://medium.com/@vishnuit18/google-calendar-sync-with-nodejs-91a88e1f1f47
+// https://zapier.com/engineering/how-to-use-the-google-calendar-api/
+// https://stackoverflow.com/questions/44962062/accessing-google-calendar-api-from-node-server
+
 const Lesson = require('../models/lesson.js');
 const mongoose = require('mongoose');
 const { google } = require('googleapis')
-// https://medium.com/@vishnuit18/google-calendar-sync-with-nodejs-91a88e1f1f47
-// https://zapier.com/engineering/how-to-use-the-google-calendar-api/
-
-let auth = new google.auth.OAuth2(
-    process.env.GOOGLE_OAUTH2_CLIENT_ID,
-    process.env.GOOGLE_OAUTH2_CLIENT_SECRET,
-    process.env.GOOGLE_OAUTH2_REDIRECT
-);
-
-let credentials = {
-    access_token: process.env.GOOGLE_ACCESS_TOKEN,
-    refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-};
-auth.setCredentials(credentials);
-
-const calendar = google.calendar({ version: 'v3', auth: auth })
+var key = require("../oauth2creds.json");
 
 exports.getAll = async function(req, res, next) {
 	Lesson.find({}, function(err, result) {
@@ -29,10 +20,28 @@ exports.getAll = async function(req, res, next) {
 }
 
 exports.getGoogleCalendar = async function(req, res, next) {
+    let jwtClient = new google.auth.JWT(
+       key.client_email,
+       null,
+       key.private_key,
+       ['https://www.googleapis.com/auth/calendar']
+    );
+    //authenticate request
+    jwtClient.authorize(function (err, tokens) {
+         if (err) {
+           console.log(err);
+           return;
+         } else {
+           console.log("Successfully connected!");
+         }
+    });
+
 	let events = [];
+    let calendar = google.calendar('v3');
 
 	calendar.events.list({
-	    calendarId: 'primary',
+        auth: jwtClient,
+	    calendarId: 'faiden454@gmail.com',
 	    timeMin: (new Date()).toISOString(),
 	    maxResults: 9999,
     	singleEvents: true,
