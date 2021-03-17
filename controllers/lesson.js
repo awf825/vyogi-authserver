@@ -7,7 +7,11 @@
 const Lesson = require('../models/lesson.js');
 const mongoose = require('mongoose');
 const { google } = require('googleapis')
-var key = require("../oauth2creds.json");
+if (process.env.NODE_ENV === 'production') {
+  var key = require("../dummy.json");
+} else {
+  var key = require("../oauth2creds.json");
+}
 
 exports.getAll = async function(req, res, next) {
 	Lesson.find({}, function(err, result) {
