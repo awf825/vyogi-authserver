@@ -18,11 +18,8 @@ module.exports = function(app) {
   app.post('/signout', Authentication.signout)
   app.get('/lessons', requireAuth, LessonControl.getAll)
   app.get('/stripe', requireAuth, ChargeControl.serveToken)
-
   app.get('/calendar', requireAuth, LessonControl.getGoogleCalendar)
-
   app.post('/charges', requireAuth, ChargeControl.charge)
   app.post('/video', requireAuth, VideoControl.buildVideo)
-  // app.get('/video', VideoControl.buildVideo)
   app.post('/video_client', requireAuth, VideoControl.requestVideo)
 }
