@@ -36,9 +36,14 @@ exports.getAll = async function(req, res, next) {
 // }
 
 exports.getGoogleCalendar = async function(req, res, next) {
+    // const dev = (process.env.NODE_ENV === 'development');
+    const k = process.env.GOOGLE_OAUTH2_PRIVATE_KEY.replace(/\\n/g, '\n');
+    // const devPk = process.env.GOOGLE_OAUTH2_PRIVATE_KEY;
+    // const k = dev ? devPk :prodPk);
+
     const key = {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_OAUTH2_PRIVATE_KEY,
+      private_key: k,
     }
 
     const auth = new google.auth.JWT(
