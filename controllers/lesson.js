@@ -36,23 +36,14 @@ exports.getAll = async function(req, res, next) {
 // }
 
 exports.getGoogleCalendar = async function(req, res, next) {
-    // const dev = (process.env.NODE_ENV === 'development');
-    // const k = process.env.GOOGLE_OAUTH2_PRIVATE_KEY.replace(/\\n/g, '\n');
-    // // const devPk = process.env.GOOGLE_OAUTH2_PRIVATE_KEY;
-    // // const k = dev ? devPk :prodPk);
-
-    // const key = {
-    //   client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    //   private_key: k,
-    // }
-    // const s3 = new AWS.S3();
     const accessKey = process.env.AWS_ACCESS_KEY
     const secretKey = process.env.AWS_SECRET
 
     const s3 = new AWS.S3({
       accessKeyId: accessKey,
       secretAccessKey: secretKey
-    }) 
+    });
+
     try {
         const params = {
             Bucket: "google-creds-dev",
