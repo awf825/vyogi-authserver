@@ -6,6 +6,7 @@ schemas/
 
 config.js
 oauth2creds.json
+reverseString.js
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

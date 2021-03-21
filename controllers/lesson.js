@@ -19,22 +19,6 @@ exports.getAll = async function(req, res, next) {
 	});
 }
 
-// exports.lambda = async function(req, res, next) {
-//   AWS.config.update({ 
-//     accessKeyId: process.env.AWS_ACCESS_KEY, 
-//     secretAccessKey: process.env.AWS_SECRET_KEY, 
-//     region: 'us-east-1',
-//   });
-
-//   const params = { FunctionName: 'googleJWT' };
-//   const result = await (new AWS.Lambda().invoke(params).promise());
-
-//   let events = [];
-//   let calendar = google.calendar('v3');
-
-//   res.json(result.Payload)
-// }
-
 exports.getGoogleCalendar = async function(req, res, next) {
     const accessKey = process.env.AWS_ACCESS_KEY
     const secretKey = process.env.AWS_SECRET
@@ -46,8 +30,8 @@ exports.getGoogleCalendar = async function(req, res, next) {
 
     try {
         const params = {
-            Bucket: "google-creds-dev",
-            Key: "oauth2creds.json"
+            Bucket: process.env.GOOGLE_CREDS_BUCKET_NAME,
+            Key: process.env.GOOGLE_CREDS_BUCKET_KEY
         };
         // RIGHT HERE
         var resp = await s3.getObject(params).promise();
@@ -78,7 +62,7 @@ exports.getGoogleCalendar = async function(req, res, next) {
     let calendar = google.calendar('v3');
 
   	calendar.events.list({
-  	    calendarId: 'faiden454@gmail.com',
+  	    calendarId: process.env.CALENDAR,
   	    timeMin: (new Date()).toISOString(),
   	    maxResults: 9999,
       	singleEvents: true,
