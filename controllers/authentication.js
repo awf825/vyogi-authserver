@@ -22,6 +22,7 @@ exports.signin = function(req, res, next) {
   res.send({ 
     token: tokenForUser(req.user), 
     _id: req.user._id,
+    email: req.user.email,
     isAdmin: req.user.isAdmin
   })
 }
@@ -53,7 +54,8 @@ exports.signup = async function(req, res, next) {
       // Repond to request indicating the user was created
       res.json({ 
         token: tokenForUser(user),
-        _id: user._id
+        _id: user._id,
+        email: user.email
       });
     });
   })

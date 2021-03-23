@@ -1,9 +1,9 @@
+//https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html
 const mongoose = require('mongoose');
 const Booking = require('../models/booking.js')
 const User = require('../models/user.js')
 const Lesson = require('../models/lesson.js')
 const AWS = require('aws-sdk')
-// const webEnvs = ['beta', 'production']
 const pubKey = process.env.STRIPE_PUBLISHABLE_KEY_TEST;
 const stripeSecret = process.env.STRIPE_SECRET_KEY_TEST;
 const accessKey = process.env.AWS_ACCESS_KEY;
@@ -25,10 +25,10 @@ exports.charge = async function(req, res, next) {
 	const stripe = Stripe(stripeSecret);
 	const lesson = req.body.lesson;
 	const user = req.body.user;
+	const email = req.body.email;
 	const userQuery = { "_id": user };
-	const lessonQuery = { "_id": lesson };
-	var str = Math.random().toString(20).split('.')[1]
-	let code = str.slice(-4) + str.slice(0, 4) 
+	var str = Math.random().toString(20).split('.')[1];
+	let code = str.slice(-4) + str.slice(0, 4);
 
 	const newBooking = new Booking({
 		payment_made: true,
@@ -69,23 +69,31 @@ exports.charge = async function(req, res, next) {
 		);
 
 		const emailParams = {
-			Source: 'no-reply@yogastaging.net',
+			Source: process.env.SES_OUTBOUND,
 			Destination: {
-				ToAddresses: [
-					'faiden454@gmail.com'
-				]
+				ToAddresses: [`${email}`]
 			},
 			Message: {
 				Body: {
 					Html: {
 						Charset: 'UTF-8',
-						Data: `${code}`
+						Data: 
+						`
+							Hello ${email.split('@')[0]},
+							<br>
+							<br>
+							Thank you for your purchase! Use this code to access the video when its time for our lesson.
+							<br>
+							<strong>${code}</strong>
+							<br>
+							See you there!
+							<br>
+							<br>
+							Lan
+						`
 					}
 				},
-				Subject: {
-					Charset: 'UTF-8',
-					Data: 'Hello Big Joe'
-				}
+				Subject: { Charset: 'UTF-8', Data: 'Access Code' }
 			}
 		};
 
