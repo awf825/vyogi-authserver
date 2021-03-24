@@ -4,19 +4,19 @@
 // https://zapier.com/engineering/how-to-use-the-google-calendar-api/
 // https://stackoverflow.com/questions/44962062/accessing-google-calendar-api-from-node-server
 
-const Lesson = require('../models/lesson.js');
+const Booking = require('../models/booking.js');
 const mongoose = require('mongoose');
 const { google } = require('googleapis');
 const AWS = require('aws-sdk');
 
-exports.getAll = async function(req, res, next) {
-	Lesson.find({}, function(err, result) {
-	    if (err) {
-	      console.log(err);
-	    } else {
-	      res.json(result);
-	    }
-	});
+exports.getAllBookings = async function(req, res, next) {
+  Booking.find({"userId":req.body.user}, function(err, result) {
+    if (err) {
+      res.sendStatus(500);
+    } else {
+      res.json(result);
+    };
+  })
 }
 
 exports.getGoogleCalendar = async function(req, res, next) {

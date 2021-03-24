@@ -34,7 +34,9 @@ exports.charge = async function(req, res, next) {
 		payment_made: true,
 		cancelled: false,
 		userId: user,
-		lessonId: lesson,
+		lessonStart: req.body.start,
+		lessonEnd: req.body.end,
+		lessonCost: req.body.cost,
 		code: code,
 		createdAt: new Date()
 	});
@@ -60,6 +62,9 @@ exports.charge = async function(req, res, next) {
 						"_id": booking._id, 
 						"lessonId": lesson,
 						"code": booking.code,
+						"lessonStart": booking.lessonStart,
+						"lessonEnd": booking.lessonEnd,
+						"lessonCost": booking.lessonCost,
 						"createdAt": new Date()
 					}
 				} 
@@ -82,7 +87,8 @@ exports.charge = async function(req, res, next) {
 							Hello ${email.split('@')[0]},
 							<br>
 							<br>
-							Thank you for your purchase! Use this code to access the video when its time for our lesson.
+							Thank you for signing up for a private yoga lesson! I can't wait to see you! I'm hoping our time together leaves you feeling calm and refreshed. 
+							Use the code below to access the video when its time for our lesson.
 							<br>
 							<strong>${code}</strong>
 							<br>
