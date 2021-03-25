@@ -17,6 +17,7 @@ module.exports = function(app) {
   app.post('/signin', requireSignin, Authentication.signin)
   app.post('/signout', Authentication.signout)
   app.post('/bookings', requireAuth, LessonControl.getAllBookings)
+  app.post('/cancel', requireAuth, LessonControl.cancel)
   app.get('/stripe', requireAuth, ChargeControl.serveToken)
   app.get('/calendar', requireAuth, LessonControl.getGoogleCalendar)
   app.post('/charges', requireAuth, ChargeControl.charge)

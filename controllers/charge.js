@@ -29,6 +29,7 @@ exports.charge = async function(req, res, next) {
 	const userQuery = { "_id": user };
 	var str = Math.random().toString(20).split('.')[1];
 	let code = str.slice(-4) + str.slice(0, 4);
+	let chargeId;
 
 	const newBooking = new Booking({
 		payment_made: true,
@@ -42,12 +43,12 @@ exports.charge = async function(req, res, next) {
 	});
 
 	try {
-		charge = await stripe.charges.create({
+		await stripe.charges.create({
 	  		amount: req.body.cost*1000,
 	  		currency: 'usd',
 	  		source: req.body.token,
 	  		description: 'My Test Charge API docs',
-		});
+		})
 	} catch (err) {
 		res.send(500, { message: err })
 	}

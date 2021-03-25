@@ -19,6 +19,18 @@ exports.getAllBookings = async function(req, res, next) {
   })
 }
 
+exports.cancel = async function(req, res, next) {
+  Booking.findOneAndUpdate(
+      {"_id":req.body.booking}, 
+      { 
+        "cancelled":true
+      }, function(err, doc) {
+        if (err) return res.send(500, {error: err});
+      } 
+  );
+  res.sendStatus(204)
+}
+
 exports.getGoogleCalendar = async function(req, res, next) {
     const accessKey = process.env.AWS_ACCESS_KEY
     const secretKey = process.env.AWS_SECRET
