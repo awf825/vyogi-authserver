@@ -3,6 +3,7 @@ const Lesson = require('../models/lesson.js');
 const Booking = require('../models/booking.js');
 const LessonControl = require('./lesson.js');
 const AWS = require('aws-sdk');
+const { google } = require('googleapis');
 const fs = require('fs');
 const accessKey = process.env.AWS_ACCESS_KEY
 const secretKey = process.env.AWS_SECRET
@@ -12,15 +13,6 @@ const s3 = new AWS.S3({
   accessKeyId: accessKey,
   secretAccessKey: secretKey
 }) 
-
-const { google } = require('googleapis')
-const { OAuth2 } = google.auth
-const OAuth2ClientId = process.env.GOOGLE_OAUTH2_CLIENT_ID;
-const OAuth2Secret = process.env.GOOGLE_OAUTH2_CLIENT_SECRET;
-const OAuth2RefreshToken = process.env.GOOGLE_OAUTH2_CLIENT_REFRESH_TOKEN;
-const OAuth2Client = new OAuth2(OAuth2ClientId, OAuth2Secret);
-OAuth2Client.setCredentials({ refresh_token: OAuth2RefreshToken })
-const calendar = google.calendar({ version: 'v3', auth: OAuth2Client })
 
 let now = + new Date();
 var y = new Date().getFullYear();
@@ -32,8 +24,10 @@ var et = new Date();
 et.setHours( et.getHours() + 1 )
 
 exports.buildVideo = async function(req, res, next) {
+  const calendar = await getCalendarJWT()
+
   calendar.events.list({
-      calendarId: 'primary',
+      calendarId: process.env.CALENDAR,
       timeMin: (new Date()).toISOString(),
       timeMax: et.toISOString(),
       maxResults: 9999,
@@ -95,8 +89,10 @@ exports.buildVideo = async function(req, res, next) {
 }
 
 exports.requestVideo = async function(req, res, next) {
+  const calendar = await getCalendarJWT()
+
   calendar.events.list({
-      calendarId: 'primary',
+      calendarId: process.env.CALENDAR,
       timeMin: (new Date()).toISOString(),
       timeMax: et.toISOString(),
       maxResults: 9999,
@@ -127,4 +123,41 @@ exports.requestVideo = async function(req, res, next) {
         res.json({"message":"There is no lesson to request at this time."})
       }
   })
+}
+
+getCalendarJWT = async function(req, res, next) {
+  try {
+      const params = {
+          Bucket: process.env.GOOGLE_CREDS_BUCKET_NAME,
+          Key: process.env.GOOGLE_CREDS_BUCKET_KEY
+      };
+      // RIGHT HERE
+      var resp = await s3.getObject(params).promise();
+
+  } catch (error) {
+      console.log(error);
+      return;
+  }  
+
+  const creds = JSON.parse(resp.Body.toString('utf-8'));
+
+  const key = {
+    client_email: creds.client_email,
+    private_key: creds.private_key,
+  }
+
+  const auth = new google.auth.JWT(
+    key.client_email,
+    null,
+    key.private_key,
+    ["https://www.googleapis.com/auth/calendar"],
+    null
+  );
+
+  google.options({auth});
+
+  let calendar = google.calendar('v3');
+
+  return calendar;
+
 }

@@ -38,6 +38,7 @@ exports.charge = async function(req, res, next) {
 		lessonStart: req.body.start,
 		lessonEnd: req.body.end,
 		lessonCost: req.body.cost,
+		lessonId: lesson,
 		code: code,
 		createdAt: new Date()
 	});

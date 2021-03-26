@@ -5,7 +5,7 @@ let bookingSchema = new Schema({
 	payment_made: Boolean,
 	cancelled: Boolean,
 	userId: String,
-	// lessonId: String,
+	lessonId: String,
 	lessonCost: Number,
 	lessonStart: String,
 	lessonEnd: String,
