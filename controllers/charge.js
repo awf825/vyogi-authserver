@@ -29,87 +29,87 @@ exports.charge = async function(req, res, next) {
 	const userQuery = { "_id": user };
 	var str = Math.random().toString(20).split('.')[1];
 	let code = str.slice(-4) + str.slice(0, 4);
-	let chargeId;
 
-	const newBooking = new Booking({
-		payment_made: true,
-		cancelled: false,
-		userId: user,
-		lessonStart: req.body.start,
-		lessonEnd: req.body.end,
-		lessonCost: req.body.cost,
-		code: code,
-		createdAt: new Date()
-	});
+	stripe.charges.create({
+	 	amount: req.body.cost*1000,
+	 	currency: 'usd',
+	  	source: req.body.token,
+	  	description: 'My Test Charge API docs',
+	}).then(async charge => {
 
-	try {
-		await stripe.charges.create({
-	  		amount: req.body.cost*1000,
-	  		currency: 'usd',
-	  		source: req.body.token,
-	  		description: 'My Test Charge API docs',
-		})
-	} catch (err) {
-		res.send(500, { message: err })
-	}
+		const newBooking = new Booking({
+			payment_made: true,
+			cancelled: false,
+			userId: user,
+			lessonStart: req.body.start,
+			lessonEnd: req.body.end,
+			lessonCost: req.body.cost,
+			chargeId: charge.id,
+			code: code,
+			createdAt: new Date()
+		});
 
-	await newBooking.save(function (err, booking) {
-		if (err) return handleError(err);
-		User.findOneAndUpdate(
-			userQuery, 
-			{ 
-				"$push": { 
-					"bookings": { 
-						"_id": booking._id, 
-						"lessonId": lesson,
-						"code": booking.code,
-						"lessonStart": booking.lessonStart,
-						"lessonEnd": booking.lessonEnd,
-						"lessonCost": booking.lessonCost,
-						"createdAt": new Date()
-					}
+		await newBooking.save(function (err, booking) {
+			if (err) return handleError(err);
+			User.findOneAndUpdate(
+				userQuery, 
+				{ 
+					"$push": { 
+						"bookings": { 
+							"_id": booking._id, 
+							"lessonId": lesson,
+							"code": booking.code,
+							"lessonStart": booking.lessonStart,
+							"lessonEnd": booking.lessonEnd,
+							"lessonCost": booking.lessonCost,
+							"chargeId": charge.id,
+							"createdAt": new Date()
+						}
+					} 
+				}, function(err, doc) {
+					if (err) return res.send(500, {error: err});
 				} 
-			}, function(err, doc) {
-				if (err) return res.send(500, {error: err});
-			} 
-		);
+			);
 
-		const emailParams = {
-			Source: process.env.SES_OUTBOUND,
-			Destination: {
-				ToAddresses: [`${email}`]
-			},
-			Message: {
-				Body: {
-					Html: {
-						Charset: 'UTF-8',
-						Data: 
-						`
-							Hello ${email.split('@')[0]},
-							<br>
-							<br>
-							Thank you for signing up for a private yoga lesson! I can't wait to see you! I'm hoping our time together leaves you feeling calm and refreshed. 
-							Use the code below to access the video when its time for our lesson.
-							<br>
-							<strong>${code}</strong>
-							<br>
-							See you there!
-							<br>
-							<br>
-							Lan
-						`
-					}
+			const emailParams = {
+				Source: process.env.SES_OUTBOUND,
+				Destination: {
+					ToAddresses: [`${email}`]
 				},
-				Subject: { Charset: 'UTF-8', Data: 'Access Code' }
-			}
-		};
+				Message: {
+					Body: {
+						Html: {
+							Charset: 'UTF-8',
+							Data: 
+							`
+								Hello ${email.split('@')[0]},
+								<br>
+								<br>
+								Thank you for signing up for a private yoga lesson! I can't wait to see you! I'm hoping our time together leaves you feeling calm and refreshed. 
+								Use the code below to access the video when its time for our lesson.
+								<br>
+								<strong>${code}</strong>
+								<br>
+								See you there!
+								<br>
+								<br>
+								Lan
+							`
+						}
+					},
+					Subject: { Charset: 'UTF-8', Data: 'Access Code' }
+				}
+			};
 
-		new AWS.SES(SESConfig).sendEmail(emailParams).promise().then((res) => {
-			console.log(res)
-		}).catch(err => {
-			console.log('error with ses:', err)
-		})
+			new AWS.SES(SESConfig).sendEmail(emailParams).promise().then((res) => {
+				console.log(res)
+			}).catch(err => {
+				console.log('error with ses:', err)
+			})
 
-		res.sendStatus(204);
-	});
+			res.sendStatus(204);
+		});
+	}).catch(err => {
+		res.send(500, { message: err })
+	})
 }
