@@ -8,6 +8,9 @@ const Booking = require('../models/booking.js');
 const mongoose = require('mongoose');
 const { google } = require('googleapis');
 const AWS = require('aws-sdk');
+const Stripe = require('stripe');
+const stripeSecret = process.env.STRIPE_SECRET_KEY_TEST;
+const stripe = Stripe(stripeSecret);
 
 exports.getAllBookings = async function(req, res, next) {
   Booking.find({"userId":req.body.user}, function(err, result) {
@@ -20,15 +23,22 @@ exports.getAllBookings = async function(req, res, next) {
 }
 
 exports.cancel = async function(req, res, next) {
-  Booking.findOneAndUpdate(
-      {"_id":req.body.booking}, 
+  await stripe.refunds.create({
+    charge: req.body.chargeId,
+  }).then(refund => {
+    Booking.findOneAndUpdate(
+      { "_id":req.body.bookingId }, 
       { 
-        "cancelled":true
+        "cancelled":true,
+        "refundId": refund.id
       }, function(err, doc) {
         if (err) return res.send(500, {error: err});
+        res.sendStatus(204);
       } 
-  );
-  res.sendStatus(204)
+    );
+  }).catch(err => {
+    if (err) return res.send(500, {error: err});
+  })
 }
 
 exports.getGoogleCalendar = async function(req, res, next) {

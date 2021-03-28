@@ -5,6 +5,8 @@ const VideoControl = require('./controllers/video.js');
 const passportService = require('./services/passport.js');
 const passport = require('passport');
 
+var nodemailer = require('nodemailer');
+
 const requireAuth = passport.authenticate('jwt', { session: false });
 const requireSignin = passport.authenticate('local', { session: false });
 
