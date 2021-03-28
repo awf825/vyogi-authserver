@@ -8,13 +8,7 @@ const pubKey = process.env.STRIPE_PUBLISHABLE_KEY_TEST;
 const stripeSecret = process.env.STRIPE_SECRET_KEY_TEST;
 const accessKey = process.env.AWS_ACCESS_KEY;
 const secretKey = process.env.AWS_SECRET;
-
-const SESConfig = {
-	apiVersion: '2010-12-01',
-	accessKeyId: accessKey,
-	secretAccessKey: secretKey,
-	region: 'us-east-1'
-}
+var nodemailer = require('nodemailer');
 
 exports.serveToken = function(req, res, next) {
 	res.json(pubKey)
@@ -68,46 +62,43 @@ exports.charge = async function(req, res, next) {
 					} 
 				}, function(err, doc) {
 					if (err) return res.send(500, {error: err});
+					let subject = "BigJoe";
+					let transporter = nodemailer.createTransport({
+						host: 'smtp.gmail.com',
+						port: 465,
+						secure: true,
+						//!!! 
+						// https://medium.com/@mavroeidakos.theodoros/configuring-nodemailer-with-gmail-in-aws-ec2-dc16b27b49ad
+						// auth: {
+						// 	type: "OAuth2",
+						// 	user:
+						// 	clientId: 
+						// 	clientSecret:
+						// 	refreshToken:
+						// }
+						auth: {     
+			        		user: process.env.CODE_GMAIL_ADDRESS,     
+			        		pass: process.env.CODE_GMAIL_PASS   
+			      		}
+					})
+
+					let mailOptions = {
+						to: `${email}`,
+						from: process.env.CODE_GMAIL_PASS,
+						subject: "Thank you for ordering an online yoga lesson!",
+						text: "Hello Big Joe"
+					};
+
+					transporter.sendMail(mailOptions, (error, info) => {
+						if (error) {
+							res.send(500, { message: error })
+					        res.end();
+				      	}
+					    res.sendStatus(204); 
+					    res.end()
+					})
 				} 
 			);
-
-			const emailParams = {
-				Source: process.env.SES_OUTBOUND,
-				Destination: {
-					ToAddresses: [`${email}`]
-				},
-				Message: {
-					Body: {
-						Html: {
-							Charset: 'UTF-8',
-							Data: 
-							`
-								Hello ${email.split('@')[0]},
-								<br>
-								<br>
-								Thank you for signing up for a private yoga lesson! I can't wait to see you! I'm hoping our time together leaves you feeling calm and refreshed. 
-								Use the code below to access the video when its time for our lesson.
-								<br>
-								<strong>${code}</strong>
-								<br>
-								See you there!
-								<br>
-								<br>
-								Lan
-							`
-						}
-					},
-					Subject: { Charset: 'UTF-8', Data: 'Access Code' }
-				}
-			};
-
-			new AWS.SES(SESConfig).sendEmail(emailParams).promise().then((res) => {
-				console.log(res)
-			}).catch(err => {
-				console.log('error with ses:', err)
-			})
-
-			res.sendStatus(204);
 		});
 	}).catch(err => {
 		res.send(500, { message: err })
