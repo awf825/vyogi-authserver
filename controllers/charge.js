@@ -62,36 +62,58 @@ exports.charge = async function(req, res, next) {
 					} 
 				}, function(err, doc) {
 					if (err) return res.send(500, {error: err});
-					let subject = "BigJoe";
+					let html = `
+						<div>
+							<p>Hello ${email.split('@')[0]},</p>
+							<br>
+							<p>
+								Thank you for signing up for a private yoga lesson! I can't wait to see you! 
+								I'm hoping our time together leaves you feeling calm and refreshed. 
+								Use the code below to access the video when its time for our lesson.
+							</p>
+							<br>
+							<p>
+								<strong>${code}</strong>
+							</p>
+							<br>
+							<p>See you there!</p>
+							<br>
+							<p>Lan</p>
+						</div>
+					`
+					let mailAuth;
+					if (process.env.NODE_ENV === 'development') {
+						mailAuth = {
+				        	user: process.env.CODE_GMAIL_ADDRESS,     
+				        	pass: process.env.CODE_GMAIL_PASS 
+						}
+					} else {
+						mailAuth = {
+							type: "OAuth2",
+							user: process.env.CODE_GMAIL_ADDRESS,
+							clientId: process.env.GMAIL_OAUTH2_ID,
+							clientSecret: process.env.GMAIL_OAUTH2_SECRET,
+							refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN
+						}
+					}
+
 					let transporter = nodemailer.createTransport({
 						host: 'smtp.gmail.com',
 						port: 465,
 						secure: true,
-						//!!! 
-						// https://medium.com/@mavroeidakos.theodoros/configuring-nodemailer-with-gmail-in-aws-ec2-dc16b27b49ad
-						// auth: {
-						// 	type: "OAuth2",
-						// 	user:
-						// 	clientId: 
-						// 	clientSecret:
-						// 	refreshToken:
-						// }
-						auth: {     
-			        		user: process.env.CODE_GMAIL_ADDRESS,     
-			        		pass: process.env.CODE_GMAIL_PASS   
-			      		}
+						auth: mailAuth
 					})
 
 					let mailOptions = {
 						to: `${email}`,
-						from: process.env.CODE_GMAIL_PASS,
+						from: process.env.CODE_GMAIL_ADDRESS,
 						subject: "Thank you for ordering an online yoga lesson!",
-						text: "Hello Big Joe"
+						html: html
 					};
 
 					transporter.sendMail(mailOptions, (error, info) => {
 						if (error) {
-							res.send(500, { message: error })
+							res.status(500).send(error);
 					        res.end();
 				      	}
 					    res.sendStatus(204); 
