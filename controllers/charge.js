@@ -29,7 +29,7 @@ exports.charge = async function(req, res, next) {
 	 	currency: 'usd',
 	  	source: req.body.token,
 	  	description: 'My Test Charge API docs',
-	}).then(async charge => {
+	}).then(charge => {
 
 		const newBooking = new Booking({
 			payment_made: true,
@@ -43,84 +43,74 @@ exports.charge = async function(req, res, next) {
 			createdAt: new Date()
 		});
 
-		await newBooking.save(function (err, booking) {
+		newBooking.save(async function (err, booking) {
 			if (err) return handleError(err);
-			User.findOneAndUpdate(
-				userQuery, 
-				{ 
-					"$push": { 
-						"bookings": { 
-							"_id": booking._id, 
-							"lessonId": lesson,
-							"code": booking.code,
-							"lessonStart": booking.lessonStart,
-							"lessonEnd": booking.lessonEnd,
-							"lessonCost": booking.lessonCost,
-							"chargeId": charge.id,
-							"createdAt": new Date()
-						}
-					} 
-				}, function(err, doc) {
-					if (err) return res.send(500, {error: err});
-					let html = `
-						<div>
-							<p>Hello ${email.split('@')[0]},</p>
-							<br>
-							<p>
-								Thank you for signing up for a private yoga lesson! I can't wait to see you! 
-								I'm hoping our time together leaves you feeling calm and refreshed. 
-								Use the code below to access the video when its time for our lesson.
-							</p>
-							<br>
-							<p>
-								<strong>${code}</strong>
-							</p>
-							<br>
-							<p>See you there!</p>
-							<br>
-							<p>Lan</p>
-						</div>
-					`
-					let mailAuth;
-					if (process.env.NODE_ENV === 'development') {
-						mailAuth = {
-				        	user: process.env.CODE_GMAIL_ADDRESS,     
-				        	pass: process.env.CODE_GMAIL_PASS 
-						}
-					} else {
-						mailAuth = {
-							type: "OAuth2",
-							user: process.env.CODE_GMAIL_ADDRESS,
-							clientId: process.env.GMAIL_OAUTH2_ID,
-							clientSecret: process.env.GMAIL_OAUTH2_SECRET,
-							refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN
-						}
-					}
+			let html = `
+				<div>
+					<p>Hello ${email.split('@')[0]},</p>
+					<br>
+					<p>
+						Thank you for signing up for a private yoga lesson! I can't wait to see you! 
+						I'm hoping our time together leaves you feeling calm and refreshed. 
+						Use the code below to access the video when its time for our lesson.
+					</p>
+					<br>
+					<p>
+						<strong>${code}</strong>
+					</p>
+					<br>
+					<p>See you there!</p>
+					<br>
+					<p>Lan</p>
+				</div>
+			`
+			let mailAuth;
+			if (process.env.NODE_ENV === 'development') {
+				mailAuth = {
+		        	user: process.env.CODE_GMAIL_ADDRESS,     
+		        	pass: process.env.CODE_GMAIL_PASS 
+				}
+			} else {
+				mailAuth = {
+					type: "OAuth2",
+					user: process.env.CODE_GMAIL_ADDRESS,
+					pass: process.env.CODE_GMAIL_PASS,
+					clientId: process.env.GMAIL_OAUTH2_ID,
+					clientSecret: process.env.GMAIL_OAUTH2_SECRET,
+					refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN
+				}
+			}
+			// mailAuth = {
+			// 	type: "OAuth2",
+			// 	user: process.env.CODE_GMAIL_ADDRESS,
+			// 	pass: process.env.CODE_GMAIL_PASS,
+			// 	clientId: process.env.GMAIL_OAUTH2_ID,
+			// 	clientSecret: process.env.GMAIL_OAUTH2_SECRET,
+			// 	refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN
+			// 	// accessToken: process.env.GMAIL_AOUTH2_ACCESS_TOKEN
+			// }
 
-					let transporter = nodemailer.createTransport({
-						host: 'smtp.gmail.com',
-						port: 465,
-						secure: true,
-						auth: mailAuth
-					})
+			let transporter = nodemailer.createTransport({
+				host: 'smtp.gmail.com',
+				port: 465,
+				secure: true,
+				auth: mailAuth,
+			})
 
-					let mailOptions = {
-						to: `${email}`,
-						from: process.env.CODE_GMAIL_ADDRESS,
-						subject: "Thank you for ordering an online yoga lesson!",
-						html: html
-					};
+			let mailOptions = {
+				to: `${email}`,
+				from: process.env.CODE_GMAIL_ADDRESS,
+				subject: "Thank you for ordering an online yoga lesson!",
+				html: html
+			};
 
-					transporter.sendMail(mailOptions, (error, info) => {
-						if (error) {
-							res.status(500).send(error);
-					        res.end();
-				      	}
-					    res.sendStatus(204); 
-					    res.end()
-					})
-				} 
-			);
+			transporter.sendMail(mailOptions, (error, info) => {
+				if (error) {
+					res.status(500).send(error);
+					return;
+		      	}
+			    res.sendStatus(204); 
+			})
 		});
 	}).catch(err => {
 		res.send(500, { message: err })

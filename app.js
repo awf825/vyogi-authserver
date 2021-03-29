@@ -25,7 +25,8 @@ const allowedOrigins = [
 	'http://localhost:3000',
 	'http://localhost:3002', 
 	'https://www.yogastaging.net', 
-	'https://www.yogawithlan.com'
+	'https://www.yogawithlan.com',
+	'smtp.gmail.com'
 ]
 
 app.use(cors({
