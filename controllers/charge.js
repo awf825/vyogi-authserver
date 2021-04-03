@@ -35,6 +35,7 @@ exports.charge = async function(req, res, next) {
 			payment_made: true,
 			cancelled: false,
 			userId: user,
+			lessonId: lesson,
 			lessonStart: req.body.start,
 			lessonEnd: req.body.end,
 			lessonCost: req.body.cost,
