@@ -78,18 +78,10 @@ exports.charge = async function(req, res, next) {
 					pass: process.env.CODE_GMAIL_PASS,
 					clientId: process.env.GMAIL_OAUTH2_ID,
 					clientSecret: process.env.GMAIL_OAUTH2_SECRET,
-					refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN
+					refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN,
+					accessToken: process.env.GMAIL_OAUTH2_ACCESS_TOKEN
 				}
 			}
-			// mailAuth = {
-			// 	type: "OAuth2",
-			// 	user: process.env.CODE_GMAIL_ADDRESS,
-			// 	pass: process.env.CODE_GMAIL_PASS,
-			// 	clientId: process.env.GMAIL_OAUTH2_ID,
-			// 	clientSecret: process.env.GMAIL_OAUTH2_SECRET,
-			// 	refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN
-			// 	// accessToken: process.env.GMAIL_AOUTH2_ACCESS_TOKEN
-			// }
 
 			let transporter = nodemailer.createTransport({
 				host: 'smtp.gmail.com',
