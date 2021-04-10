@@ -11,6 +11,11 @@ let bookingSchema = new Schema({
 	lessonCost: Number,
 	lessonStart: String,
 	lessonEnd: String,
+	pregnancyCheck: String,
+	practiced: String,
+	limitations: String,
+	focus: String,
+	needToKnow: String,
 	code: String,
 	createdAt: Date
 },

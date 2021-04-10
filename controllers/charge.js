@@ -40,13 +40,18 @@ exports.charge = async function(req, res, next) {
 			lessonEnd: req.body.end,
 			lessonCost: req.body.cost,
 			chargeId: charge.id,
+			pregnancyCheck: req.body.check,
+			practiced: req.body.practiced,
+			limitations: req.body.limitations,
+			focus: req.body.focused,
+			needToKnow: req.body.needToKnow,
 			code: code,
 			createdAt: new Date()
 		});
 
 		newBooking.save(async function (err, booking) {
 			if (err) return handleError(err);
-			let html = `
+			let clientHtml = `
 				<div>
 					<p>Hello ${email.split('@')[0]},</p>
 					<br>
@@ -65,22 +70,30 @@ exports.charge = async function(req, res, next) {
 					<p>Lan</p>
 				</div>
 			`
-			let mailAuth;
-			if (process.env.NODE_ENV === 'development') {
-				mailAuth = {
-		        	user: process.env.CODE_GMAIL_ADDRESS,     
-		        	pass: process.env.CODE_GMAIL_PASS 
-				}
-			} else {
-				mailAuth = {
-					type: "OAuth2",
-					user: process.env.CODE_GMAIL_ADDRESS,
-					pass: process.env.CODE_GMAIL_PASS,
-					clientId: process.env.GMAIL_OAUTH2_ID,
-					clientSecret: process.env.GMAIL_OAUTH2_SECRET,
-					refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN,
-					accessToken: process.env.GMAIL_OAUTH2_ACCESS_TOKEN
-				}
+
+			let instructorHtml = `
+				<div>
+					<h3>firstName</h3>
+				 	<h3>Pregnant? ${booking.pregnancyCheck}</h3>
+				 	<h3>Experience</h3>
+				 	<p>${booking.practiced}</p>
+				 	<h3>Limitations</h3>
+				 	<p>${booking.limitations}</p>
+				 	<h3>Focus</h3>
+				 	<p>${booking.focus}</p>
+				 	<h3>Need to Know?</h3>
+				 	<p>${booking.needToKnow}</p>
+				</div>
+			`
+
+			let mailAuth = {
+				type: "OAuth2",
+				user: process.env.CODE_GMAIL_ADDRESS,
+				pass: process.env.CODE_GMAIL_PASS,
+				clientId: process.env.GMAIL_OAUTH2_ID,
+				clientSecret: process.env.GMAIL_OAUTH2_SECRET,
+				refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN,
+				accessToken: process.env.GMAIL_OAUTH2_ACCESS_TOKEN
 			}
 
 			let transporter = nodemailer.createTransport({
@@ -90,20 +103,31 @@ exports.charge = async function(req, res, next) {
 				auth: mailAuth,
 			})
 
-			let mailOptions = {
-				to: `${email}`,
-				from: process.env.CODE_GMAIL_ADDRESS,
-				subject: "Thank you for ordering an online yoga lesson!",
-				html: html
-			};
+			let mailOptions = [
+				{
+					to: process.env.CALENDAR,
+					from: process.env.CODE_GMAIL_ADDRESS,
+					subject: "<firstName>",
+					html: instructorHtml
+				},
+				{
+					to: `${email}`,
+					from: process.env.CODE_GMAIL_ADDRESS,
+					subject: "Thank you for ordering an online yoga lesson!",
+					html: clientHtml
+				}
+			]
 
-			transporter.sendMail(mailOptions, (error, info) => {
-				if (error) {
-					res.status(500).send(error);
-					return;
-		      	}
-			    res.sendStatus(204); 
-			})
+			for (let i=0; i < mailOptions.length; i++) {
+				transporter.sendMail(mailOptions[i], (error, info) => {
+					if (error) {
+						res.status(500).send(error);
+						return;
+			      	}
+				})
+			}
+
+			res.sendStatus(204); 
 		});
 	}).catch(err => {
 		res.send(500, { message: err })
