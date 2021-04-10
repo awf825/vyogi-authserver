@@ -43,7 +43,7 @@ exports.charge = async function(req, res, next) {
 			pregnancyCheck: req.body.check,
 			practiced: req.body.practiced,
 			limitations: req.body.limitations,
-			focus: req.body.focused,
+			focus: req.body.focus,
 			needToKnow: req.body.needToKnow,
 			code: code,
 			createdAt: new Date()
