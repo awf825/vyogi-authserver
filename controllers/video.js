@@ -29,7 +29,6 @@ exports.buildVideo = async function(req, res, next) {
   calendar.events.list({
       calendarId: process.env.CALENDAR,
       timeMin: (new Date()).toISOString(),
-      timeMax: et.toISOString(),
       maxResults: 9999,
       singleEvents: true,
       orderBy: 'startTime'
@@ -94,7 +93,6 @@ exports.requestVideo = async function(req, res, next) {
   calendar.events.list({
       calendarId: process.env.CALENDAR,
       timeMin: (new Date()).toISOString(),
-      timeMax: et.toISOString(),
       maxResults: 9999,
       singleEvents: true,
       orderBy: 'startTime'
