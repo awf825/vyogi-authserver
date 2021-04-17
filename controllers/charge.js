@@ -9,6 +9,7 @@ const stripeSecret = process.env.STRIPE_SECRET_KEY_TEST;
 const accessKey = process.env.AWS_ACCESS_KEY;
 const secretKey = process.env.AWS_SECRET;
 var nodemailer = require('nodemailer');
+var xoauth2 = require('xoauth2')
 
 exports.serveToken = function(req, res, next) {
 	res.json(pubKey)
@@ -40,6 +41,7 @@ exports.charge = async function(req, res, next) {
 			lessonEnd: req.body.end,
 			lessonCost: req.body.cost,
 			chargeId: charge.id,
+			name: req.body.userName,
 			pregnancyCheck: req.body.check,
 			practiced: req.body.practiced,
 			limitations: req.body.limitations,
@@ -73,7 +75,7 @@ exports.charge = async function(req, res, next) {
 
 			let instructorHtml = `
 				<div>
-					<h3>firstName</h3>
+					<h3>${booking.name}</h3>
 				 	<h3>Pregnant? ${booking.pregnancyCheck}</h3>
 				 	<h3>Experience</h3>
 				 	<p>${booking.practiced}</p>
@@ -90,24 +92,48 @@ exports.charge = async function(req, res, next) {
 				type: "OAuth2",
 				user: process.env.CODE_GMAIL_ADDRESS,
 				pass: process.env.CODE_GMAIL_PASS,
-				clientId: process.env.GMAIL_OAUTH2_ID,
-				clientSecret: process.env.GMAIL_OAUTH2_SECRET,
-				refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN,
-				accessToken: process.env.GMAIL_OAUTH2_ACCESS_TOKEN
+				// clientId: process.env.GMAIL_OAUTH2_ID,
+				// clientSecret: process.env.GMAIL_OAUTH2_SECRET,
+				// refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN,
+				// accessToken: process.env.GMAIL_OAUTH2_ACCESS_TOKEN
 			}
 
-			let transporter = nodemailer.createTransport({
-				host: 'smtp.gmail.com',
-				port: 465,
-				secure: true,
-				auth: mailAuth,
+			var mailTokenGen = xoauth2.createXOAuth2Generator({
+				type: "OAuth2",
+				user: process.env.CODE_GMAIL_ADDRESS,
+				pass: process.env.CODE_GMAIL_PASS,
+				clientId: process.env.GMAIL_OAUTH2_ID,
+				clientSecret: process.env.GMAIL_OAUTH2_SECRET,
+				refreshToken: process.env.GMAIL_OAUTH2_REFRESH_TOKEN
 			})
+
+			// let transporter = nodemailer.createTransport({
+			// 	host: 'smtp.gmail.com',
+			// 	port: 465,
+			// 	secure: true,
+			// 	auth: {
+			// 		user: process.env.CODE_GMAIL_ADDRESS,
+			// 		pass: process.env.CODE_GMAIL_PASS,
+			// 		xoauth2: xoauth2.createXOAuth2Generator(mailAuthOptions)
+			// 	}
+			// })
+
+			var smtpTransport = nodemailer.createTransport({
+			    host: 'smtp.gmail.com',
+    			port: 465,
+    			secure: true,
+			    auth: {
+			    	user: process.env.CODE_GMAIL_ADDRESS,
+					pass: process.env.CODE_GMAIL_PASS,
+			        xoauth2: mailTokenGen
+			    }
+			});
 
 			let mailOptions = [
 				{
-					to: process.env.CALENDAR,
+					to: "aeflynn1993@gmail.com",
 					from: process.env.CODE_GMAIL_ADDRESS,
-					subject: "<firstName>",
+					subject: `${booking.name}`,
 					html: instructorHtml
 				},
 				{
@@ -118,14 +144,37 @@ exports.charge = async function(req, res, next) {
 				}
 			]
 
-			for (let i=0; i < mailOptions.length; i++) {
-				transporter.sendMail(mailOptions[i], (error, info) => {
-					if (error) {
-						res.status(500).send(error);
-						return;
-			      	}
-				})
-			}
+			mailTokenGen.generateToken(function (err, token, access) {
+				for (let i=0; i < mailOptions.length; i++) {
+					smtpTransport.sendMail(mailOptions[i], function (error, info) {
+						if (error) {
+	                    	console.log(error);
+	                    	res.sendStatus(404);
+	                	} else {
+	                    	console.log(response);
+	                	}
+					})
+				}
+				smtpTransport.close();
+			})
+
+			// transporter.sendMail(mailOptions[1], (err, info) => {
+			// 	if (err) {
+			// 		res.send(err);
+			// 		return;
+			// 	}
+			// 	res.sendStatus(204);
+			// 	res.end();
+			// })
+
+			// for (let i=0; i < mailOptions.length; i++) {
+			// 	transporter.sendMail(mailOptions[i], (error, info) => {
+			// 		// if (error) {
+			// 		// 	res.status(500).send(error);
+			// 		// 	return;
+			//   //     	}
+			// 	})
+			// }
 
 			res.sendStatus(204); 
 		});
