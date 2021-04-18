@@ -11,6 +11,7 @@ let bookingSchema = new Schema({
 	lessonCost: Number,
 	lessonStart: String,
 	lessonEnd: String,
+	userName: String,
 	pregnancyCheck: String,
 	practiced: String,
 	limitations: String,
