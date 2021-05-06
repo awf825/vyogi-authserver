@@ -1,5 +1,5 @@
 const User = require('../models/user.js');
-const Lesson = require('../models/lesson.js');
+// const Lesson = require('../models/lesson.js');
 const Booking = require('../models/booking.js');
 const LessonControl = require('./lesson.js');
 const AWS = require('aws-sdk');

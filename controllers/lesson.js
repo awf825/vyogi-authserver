@@ -5,6 +5,7 @@
 // https://stackoverflow.com/questions/44962062/accessing-google-calendar-api-from-node-server
 
 const Booking = require('../models/booking.js');
+const LessonBooking = require('../models/lessonBooking.js');
 const mongoose = require('mongoose');
 const { google } = require('googleapis');
 const AWS = require('aws-sdk');
@@ -12,8 +13,18 @@ const Stripe = require('stripe');
 const stripeSecret = process.env.STRIPE_SECRET_KEY_TEST;
 const stripe = Stripe(stripeSecret);
 
-exports.getAllBookings = async function(req, res, next) {
+exports.getAllUserBookings = async function(req, res, next) {
   Booking.find({"userId":req.body.user}, function(err, result) {
+    if (err) {
+      res.sendStatus(500);
+    } else {
+      res.json(result);
+    };
+  })
+}
+
+exports.getAllLessonBookings = async function(req, res, next) {
+  LessonBooking.find({}, function(err, result) {
     if (err) {
       res.sendStatus(500);
     } else {

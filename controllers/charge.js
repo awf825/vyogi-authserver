@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const Booking = require('../models/booking.js')
 const User = require('../models/user.js')
-const Lesson = require('../models/lesson.js')
+const LessonBooking = require('../models/lessonBooking.js')
 const AWS = require('aws-sdk')
 const pubKey = process.env.STRIPE_PUBLISHABLE_KEY_TEST;
 const stripeSecret = process.env.STRIPE_SECRET_KEY_TEST;
@@ -50,6 +50,10 @@ exports.charge = async function(req, res, next) {
 			code: code,
 			createdAt: new Date()
 		});
+
+		const newLessonBooking = new LessonBooking({
+			calendarEventId: lesson
+		})
 
 		newBooking.save(async function (err, booking) {
 			if (err) return handleError(err);
@@ -137,7 +141,11 @@ exports.charge = async function(req, res, next) {
 				smtpTransport.close();
 			})
 
-			res.sendStatus(204); 
+			newLessonBooking.save(async function (lessonErr, lesson) {
+				if (err) return handleError(lessonErr); 
+			})
+
+			res.sendStatus(204);
 		});
 	}).catch(err => {
 		res.send(500, { message: err })
