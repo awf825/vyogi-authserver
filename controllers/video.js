@@ -110,7 +110,7 @@ exports.requestVideo = async function(req, res, next) {
           }
 
           const bucketResponse = await s3.getObject(bucketParams, function(err, data) {
-            if (err) { return res.send({"message":err}) }
+            if (err) { return res.send({"message":"There is no lesson to request at this time."}) }
             res.json(data.Body.toString('utf-8'))
           });
           
